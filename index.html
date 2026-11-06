@@ -1,0 +1,970 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Tarla Defteri</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: field-notebook. One column, a control strip on top, then a province climate sheet, the sowing chart, five growth stages, inputs, pests, and a ledger of all crops. */
+:root{
+  --bg:#F1F5EE; --surface:#FFFFFF; --fg:#17261D; --muted:#52645A; --line:#D3DDD0;
+  --accent:#2A7A4A; --accent-ink:#FFFFFF; --soft:#E2EEE2;
+  --frost:#4A83B4; --warn:#BF432A; --sun:#B98A10;
+  --leaf:#3F8F4B; --stem:#2E6A3B; --soil:#8A6A4A;
+  --f-display:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1913; --surface:#16231B; --fg:#E3EDE5; --muted:#9DB0A2; --line:#27392D;
+  --accent:#5DC083; --accent-ink:#0B1A11; --soft:#1B3023;
+  --frost:#7FB0DA; --warn:#E0745C; --sun:#E5B93C;
+  --leaf:#6DBE7B; --stem:#4FA060; --soil:#9C7B58; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1913; --surface:#16231B; --fg:#E3EDE5; --muted:#9DB0A2; --line:#27392D;
+  --accent:#5DC083; --accent-ink:#0B1A11; --soft:#1B3023;
+  --frost:#7FB0DA; --warn:#E0745C; --sun:#E5B93C;
+  --leaf:#6DBE7B; --stem:#4FA060; --soil:#9C7B58; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:920px;margin:0 auto;padding-block:22px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(30px,6vw,44px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:22px;font-weight:700;margin-bottom:10px}
+h3{font-size:16px;font-weight:700}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lead{color:var(--muted);max-width:60ch;margin-top:8px}
+section{margin-top:34px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px}
+.controls{margin-top:20px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));align-items:end}
+label{display:grid;gap:4px;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.02em;min-width:0}
+select,input{font:inherit;font-size:15px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;min-width:0;width:100%}
+select:focus-visible,input:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:grid;gap:12px;margin-top:14px}
+.grow{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.chip{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:4px 13px 4px 4px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.th{width:34px;height:34px;border-radius:50%;overflow:hidden;background:var(--soft);flex:none;display:block}
+.th img{width:100%;height:100%;object-fit:cover;display:block;background:#fff}
+.th svg{width:100%;height:100%;display:block}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;border-top:1px solid var(--line);border-left:1px solid var(--line);margin-top:12px}
+.facts div{padding:10px 12px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0}
+.facts dt{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-family:var(--f-mono)}
+.facts dd{margin:2px 0 0;font-weight:600;font-variant-numeric:tabular-nums}
+.facts{margin-bottom:0}
+dl{margin:0}
+.note{color:var(--muted);font-size:13.5px}
+.today{display:grid;gap:6px;margin-top:14px;padding:12px 14px;border-left:3px solid var(--sun);background:var(--surface);border-radius:0 6px 6px 0}
+.pill{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.pill.ok::before{background:var(--accent)}
+.pill.wait::before{background:var(--sun)}
+.pill.no::before{background:var(--warn)}
+.cropHead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 16px}
+.wins{display:grid;gap:10px;margin:12px 0}
+.win{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;padding:12px 14px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;background:var(--surface)}
+.win.tun{border-left-color:var(--sun)}
+.win .k{font-family:var(--f-mono);font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.win .v{font-weight:600;font-variant-numeric:tabular-nums}
+.why{margin:12px 0 0;padding-left:18px}
+.why li{margin:5px 0;max-width:72ch}
+.chartBox{margin-top:16px;max-width:660px}
+.chartBox svg{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:14px;height:8px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.ax{fill:var(--muted);font-family:var(--f-mono);font-size:10.5px}
+.grid{stroke:var(--line);stroke-width:1}
+.stages{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:12px}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:8px;min-width:0}
+.stage .top{display:flex;gap:12px;align-items:center}
+.stage svg{width:62px;height:70px;flex:none;background:var(--soft);border-radius:6px}
+.stage .dates{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.stage p{font-size:14px}
+.stage b{font-weight:600}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin-top:12px;border:1px solid var(--line)}
+.bar span{display:block;min-width:2px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-family:var(--f-mono);font-size:11.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.disease{display:grid;gap:4px;padding:12px 0;border-bottom:1px solid var(--line)}
+.disease:last-child{border-bottom:0}
+.disease .lat{font-style:italic;color:var(--muted);font-size:13px}
+a{color:var(--accent);text-underline-offset:3px}
+.links{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:2px;font-size:13.5px}
+.ledger{display:grid;gap:0;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 14px;align-items:baseline;text-align:left;font:inherit;color:inherit;background:transparent;border:0;border-bottom:1px solid var(--line);padding:11px 4px;cursor:pointer;width:100%}
+.row:hover{background:var(--soft)}
+.row[aria-current="true"]{background:var(--soft)}
+.row .nm{font-weight:600}
+.row .sub{grid-column:1 / -1;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.foot{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);max-width:76ch}
+.stage .ph{width:84px;height:84px;flex:none;border-radius:6px;border:1px solid var(--line);background:#fff;object-fit:cover;display:block}
+.cap{font-size:12px;color:var(--muted);line-height:1.35;margin-top:2px}
+.gal{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 0}
+.gal figure{margin:0;width:112px}
+.gal img{width:112px;height:112px;object-fit:cover;border-radius:6px;border:1px solid var(--line);background:#fff;display:block}
+.gal figcaption{font-size:12px;color:var(--muted);line-height:1.3;margin-top:4px}
+.credit{font-size:11.5px;color:var(--muted);margin:6px 0 0;line-height:1.4}
+.cred{margin:10px 0 0;font-size:12px;color:var(--muted)}
+.cred summary{cursor:pointer;font-weight:600;color:var(--accent);padding:4px 0}
+.cred ul{margin:4px 0 0;padding-left:18px}
+.cred li{margin:3px 0;line-height:1.4}
+.cred p{margin:6px 0 0}
+.seed{margin-top:12px;padding:14px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;background:var(--surface)}
+.seed dl{display:grid;gap:9px;margin-top:10px}
+.seed dl>div{display:grid;grid-template-columns:9.5em minmax(0,1fr);gap:2px 12px}
+.seed dt{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.seed dd{margin:0;font-size:14px;max-width:70ch}
+.seed .note{margin-top:10px}
+.seed .links{margin-top:10px}
+.seedtab{margin-top:16px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0 14px}
+.seedtab summary{cursor:pointer;font-weight:600;color:var(--accent);padding:12px 0}
+.seedtab h3{margin:16px 0 4px;font-size:15px}
+.seedtab ul{margin:0 0 6px;padding-left:18px}
+.seedtab li{margin:4px 0;font-size:14px}
+.seedtab .note{margin:0 0 6px}
+.seedtab>:last-child{margin-bottom:14px}
+.lk{font:inherit;font-weight:600;color:var(--accent);background:transparent;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.btn{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:6px;padding:6px 12px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn[disabled]{opacity:.55;cursor:default}
+.upc{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:4px}
+.upf{display:flex;gap:10px;align-items:flex-start;margin-top:6px;padding:10px;border:1px dashed var(--line);border-radius:6px}
+.upf .pv{width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid var(--line);flex:none;background:#fff}
+.upr{display:grid;gap:8px;min-width:0;flex:1}
+.upb2{display:flex;gap:8px;flex-wrap:wrap}
+.upr input{font-weight:400}
+.uperr{color:var(--warn);font-size:12.5px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+img[data-z]{cursor:zoom-in}
+img[data-z]:hover{border-color:var(--accent)}
+img[data-z]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lb{position:fixed;inset:0;z-index:50;display:flex;overflow:auto;overscroll-behavior:contain;background:rgba(8,14,10,.92);padding:max(14px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.lb[hidden],.lb [hidden]{display:none!important}
+.lb-in{margin:auto;max-width:100%;display:grid;justify-items:center}
+.lb-f{margin:0;display:grid;justify-items:center;gap:12px;max-width:100%}
+.lb-f img{display:block;max-width:100%;border-radius:6px;background:#fff;box-shadow:0 10px 44px rgba(0,0,0,.55)}
+.lb-f figcaption{display:grid;gap:3px;max-width:62ch;text-align:center;color:#E9F0EA;font-size:14px;line-height:1.45}
+.lb-cr{font-size:12px;color:#B9C8BD}
+.lb-cr a{color:#BFE8CD;text-underline-offset:3px}
+.lb-ct{font-family:var(--f-mono);font-size:12px;color:#B9C8BD;font-variant-numeric:tabular-nums}
+.lb-x,.lb-n{position:fixed;z-index:51;width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(18,28,22,.78);color:#fff;font:inherit;font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
+.lb-x{top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right))}
+.lb-p{left:max(8px,env(safe-area-inset-left));top:50%;transform:translateY(-50%)}
+.lb-nx{right:max(8px,env(safe-area-inset-right));top:50%;transform:translateY(-50%)}
+.lb-x:hover,.lb-n:hover{background:rgba(44,66,52,.96)}
+.lb .lb-x:focus-visible,.lb .lb-n:focus-visible,.lb a:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media (max-width:600px){.lb-in{padding-bottom:64px}.lb-n{top:auto;bottom:max(14px,env(safe-area-inset-bottom));transform:none}.lb-p{left:14px}.lb-nx{right:14px}}
+@media (prefers-reduced-motion:no-preference){.lb:not([hidden]){animation:lbin .14s ease-out}@keyframes lbin{from{opacity:0}to{opacity:1}}}
+.upc .btn{white-space:normal;text-align:left}
+.lb-f figcaption span:empty{display:none}
+@media (max-width:480px){.win{grid-template-columns:1fr}.seed dl>div{grid-template-columns:1fr}}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Tarla Defteri · 81 il · 22 otsu kültür</p>
+    <h1>İlinize göre ekim, sulama, gübre ve bakım planı</h1>
+    <p class="lead">İlinizi ve kültürü seçin. Sayfa, ilin iklim normallerinden ekim penceresini, don riskini ve gelişme dönemlerini hesaplar; her adımın gerekçesini yazar.</p>
+  </header>
+
+  <div class="panel controls">
+    <label for="il">İl
+      <select id="il"></select>
+    </label>
+    <label for="airT">Bugünkü hava ölçümünüz (°C)
+      <input id="airT" type="number" inputmode="decimal" step="0.5" placeholder="isteğe bağlı">
+    </label>
+    <label for="soilT">Toprak sıcaklığı, 10 cm (°C)
+      <input id="soilT" type="number" inputmode="decimal" step="0.5" placeholder="isteğe bağlı">
+    </label>
+  </div>
+  <div class="chips" id="chips" role="group" aria-label="Kültür seçimi"></div>
+  <div id="finder"></div>
+
+  <input type="file" id="upFile" class="vh" accept="image/*" tabindex="-1" aria-hidden="true">
+  <main id="out"></main>
+
+  <p class="foot">Sıcaklık eğrisi, illerin uzun yıllar ortalamalarından (iklim normali) kurulan yaklaşık bir modeldir; ilçe, yamaç ve mikroklima farkı bırakır. Bu sayfada canlı hava durumu çekilmez, güncel tahmin için <a href="https://www.mgm.gov.tr/" target="_blank" rel="noopener">MGM</a>'e bakın ve yukarıdaki ölçüm kutularını kullanın. Sayfadaki fotoğraflar gerçektir ve sayfayla birlikte paketlenmiştir (sayfa dış sitelerden görsel yükleyemez). Bitki, meyve ve yeşillik fotoğrafları Wikimedia Commons'tan, bazı zararlı ve külleme fotoğrafları iNaturalist ile Flickr'dan alınmıştır; yazar ve lisans bilgisi her kültürün altındaki "Fotoğraf kaynakları" bölümünde ve hastalık kartlarının altındadır. Marul çimlenme-hasat kareleri bir GitHub veri setinden (CC BY-SA 4.0), meyve stüdyo çekimleri Fruits-360'tan (MIT), hastalıklı yapraklar PlantVillage veri setinden (Hughes ve Salathé; ticari olmayan kullanım) gelir. Roka, tere ve semizotu için gömülü fotoğraf bulunamadı; çimlenme aşaması gerçek fotoğrafla yalnızca marulda (ve domateste fide olarak) gösterilir, diğerlerinde çizim kullanılır. Bu boşluklar için her kültürde "Filiz nasıl tanınır?" kutusu çenek yaprağını, ilk gerçek yaprağı ve kokuyu yazıyla anlatır; çizimle gösterilen her aşama kutusunda "Kendi fotoğrafımı ekle" düğmesi vardır ve bunun için yönetici ya da düzenleme yetkisi gerekmez. Sayfa ortak kayıt kabul ediyorsa eklediğiniz fotoğraf sayfayı açan herkese görünür; kabul etmiyorsa yalnızca sizin cihazınızda ve tarayıcınızda saklanır, başka cihazda görünmez. Fotoğraflara tıklayınca büyür; kaynağı elverdiği kültürlerde büyütülen sürüm daha yüksek çözünürlüklüdür. Çizimler bitkiyi yalnızca şematik gösterir. Gübre miktarları net besin elementi (kg/da) olarak yaklaşıktır, toprak analizi esastır. İlaç seçimi için ruhsatlı ürün ve il/ilçe tarım müdürlüğü önerisini kullanın.</p>
+</div>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Fotoğraf görüntüleyici" hidden>
+  <button type="button" class="lb-x" id="lbX" aria-label="Kapat">&#x2715;</button>
+  <button type="button" class="lb-n lb-p" id="lbPrev" aria-label="Önceki fotoğraf">&#x2039;</button>
+  <button type="button" class="lb-n lb-nx" id="lbNext" aria-label="Sonraki fotoğraf">&#x203A;</button>
+  <div class="lb-in">
+    <figure class="lb-f">
+      <img id="lbImg" alt="">
+      <figcaption><span id="lbCap"></span><span class="lb-cr" id="lbCr"></span><span class="lb-ct" id="lbCount"></span></figcaption>
+    </figure>
+  </div>
+</div>
+
+<script>
+// ---------- DATA ----------
+const REG_NOT={
+ 'Akdeniz':'Yazlar sıcak ve kurak, kışlar ılık. Kışlık serin mevsim kültürleri sorunsuz yetişir, yaz ortası ısı stresi ve su ihtiyacı belirleyicidir.',
+ 'Ege':'Yazlar sıcak ve kurak, kışlar ılık-yağışlı. Sulama planı yaz boyunca zorunludur, sonbahar ekimleri güçlü sonuç verir.',
+ 'Marmara':'Geçiş iklimi: kışlar soğuk-nemli, yazlar ılık. Bahar donu ve yüksek nem (mantar hastalıkları) izlenmelidir.',
+ 'Karadeniz':'Yıl boyu yağışlı ve nemli. Sıcaklık yeterli olsa da mantar hastalığı baskısı yüksektir; havalandırma ve drenaj öncelik taşır.',
+ 'İç Anadolu':'Karasal iklim: gece-gündüz farkı büyük, geç bahar ve erken sonbahar donları sık. Ekimi dona göre ayarlamak gerekir.',
+ 'Doğu Anadolu':'Yüksek rakım, uzun soğuk kış ve kısa yaz. Sıcak sever kültürlerde mevsim kısadır; alçak tünel ve erken çeşit önemlidir.',
+ 'Güneydoğu Anadolu':'Çok sıcak ve kurak yaz, ılık kış. Temmuz-Ağustos ısı stresi nedeniyle serin kültürler sonbahar-kışa kayar.'
+};
+const PROV=`Adana|Akdeniz|23|670|19.2|9.4
+Adıyaman|Güneydoğu Anadolu|670|700|17.3|13.2
+Afyonkarahisar|Ege|1030|410|10.8|11.8
+Ağrı|Doğu Anadolu|1640|520|5|15
+Aksaray|İç Anadolu|960|340|11.5|12
+Amasya|Karadeniz|410|440|13.5|11
+Ankara|İç Anadolu|900|400|11.9|11.9
+Antalya|Akdeniz|30|1060|19.2|9.3
+Ardahan|Doğu Anadolu|1850|500|3|14.5
+Artvin|Karadeniz|600|700|12.8|9.8
+Aydın|Ege|60|650|18.5|10
+Balıkesir|Marmara|150|570|14.8|10.3
+Bartın|Karadeniz|30|1000|13.5|9
+Batman|Güneydoğu Anadolu|540|480|17.2|13.7
+Bayburt|Karadeniz|1550|430|7|13.3
+Bilecik|Marmara|500|450|12.8|10.5
+Bingöl|Doğu Anadolu|1150|1000|10.3|14.3
+Bitlis|Doğu Anadolu|1500|1000|9.8|13.8
+Bolu|Karadeniz|740|540|10.3|10.5
+Burdur|Akdeniz|960|410|13.3|11
+Bursa|Marmara|100|700|15|10
+Çanakkale|Marmara|3|600|15.2|9.5
+Çankırı|İç Anadolu|720|410|11.3|12
+Çorum|Karadeniz|800|440|11.5|11.5
+Denizli|Ege|350|550|16|10.8
+Diyarbakır|Güneydoğu Anadolu|670|490|16.3|14.3
+Düzce|Karadeniz|150|820|14|9.5
+Edirne|Marmara|50|590|13.5|11.5
+Elazığ|Doğu Anadolu|1000|400|12.8|14
+Erzincan|Doğu Anadolu|1150|380|11|13.5
+Erzurum|Doğu Anadolu|1750|430|5.2|14.3
+Eskişehir|İç Anadolu|790|370|11.2|11.3
+Gaziantep|Güneydoğu Anadolu|850|550|15.5|12.5
+Giresun|Karadeniz|10|1250|15|8.3
+Gümüşhane|Karadeniz|1250|450|9.5|11.5
+Hakkâri|Doğu Anadolu|1700|650|9|13
+Hatay|Akdeniz|80|1100|18.5|9.5
+Iğdır|Doğu Anadolu|850|260|11.5|15
+Isparta|Akdeniz|1000|500|12.8|10.8
+İstanbul|Marmara|40|800|15|9.3
+İzmir|Ege|30|700|18|9.8
+Kahramanmaraş|Akdeniz|510|700|16.8|11.8
+Karabük|Karadeniz|250|520|12|10.5
+Karaman|İç Anadolu|1030|320|11.8|11.8
+Kars|Doğu Anadolu|1750|500|3.8|14.8
+Kastamonu|Karadeniz|800|480|10.5|11
+Kayseri|İç Anadolu|1050|380|10.8|12.8
+Kilis|Güneydoğu Anadolu|650|400|17.5|11
+Kırıkkale|İç Anadolu|750|380|12.5|12
+Kırklareli|Marmara|200|570|13|10.5
+Kırşehir|İç Anadolu|1000|370|11.9|12
+Kocaeli|Marmara|70|800|14.5|9.3
+Konya|İç Anadolu|1020|320|11.5|12
+Kütahya|Ege|930|550|10.5|11.3
+Malatya|Doğu Anadolu|950|380|14|13.3
+Manisa|Ege|70|720|17|11
+Mardin|Güneydoğu Anadolu|1100|600|16|12.8
+Mersin|Akdeniz|10|600|19.3|9
+Muğla|Ege|650|1200|16.5|10.5
+Muş|Doğu Anadolu|1300|800|7.5|14.5
+Nevşehir|İç Anadolu|1250|400|11|11.8
+Niğde|İç Anadolu|1200|330|10.8|11.8
+Ordu|Karadeniz|5|1050|14.8|8.3
+Osmaniye|Akdeniz|120|1000|18.5|10
+Rize|Karadeniz|5|2200|14.5|8.5
+Sakarya|Marmara|30|800|14.5|9.3
+Samsun|Karadeniz|4|700|14.5|8.8
+Siirt|Güneydoğu Anadolu|900|750|15.5|13.3
+Sinop|Karadeniz|30|700|14.4|8.5
+Sivas|İç Anadolu|1280|430|9|12.5
+Şanlıurfa|Güneydoğu Anadolu|500|460|18.5|12.8
+Şırnak|Güneydoğu Anadolu|1000|750|15.5|13.3
+Tekirdağ|Marmara|10|580|14|9.8
+Tokat|Karadeniz|600|450|12|11
+Trabzon|Karadeniz|5|830|14.7|8.3
+Tunceli|Doğu Anadolu|1000|1000|12|14
+Uşak|Ege|900|500|12.5|11
+Van|Doğu Anadolu|1730|390|9|13.5
+Yalova|Marmara|5|850|15|9.3
+Yozgat|İç Anadolu|1300|580|10|11.5
+Zonguldak|Karadeniz|140|1200|14|8.5`.split('\n').map(l=>{const a=l.split('|');return{ad:a[0],bolge:a[1],rakim:+a[2],yagis:+a[3],Tm:+a[4],A:+a[5]}}).sort((x,y)=>x.ad.localeCompare(y.ad,'tr'));
+
+const STG={
+ meyve:['Çimlenme / tutunma','Vejetatif büyüme','Çiçeklenme','Meyve tutumu ve dolumu','Hasat'],
+ yaprak:['Çimlenme','Fide ve yaprak çıkışı','Yaprak / rozet gelişimi','Olgunlaşma','Hasat'],
+ baklagil:['Çimlenme','Vejetatif büyüme','Çiçeklenme','Bakla oluşumu','Hasat']};
+const TASK={
+ meyve:[
+  ['Küçük ve sık sulayın; kök bölgesi nemli kalsın, su durmasın.','Dikim sonrası fideyi rüzgardan ve kuvvetli güneşten koruyun; kesici kurt ve sümüklüböceği kontrol edin.'],
+  ['Seyrek ama derin sulayın; kökü derine yönlendirir.','Destek veya tel çekin, yabancı otu temizleyin, alt yaprakları toprak temasından kurtarın.'],
+  ['Düzenli sulayın; kuruyup ıslanma dalgalanması çiçek dökümüne yol açar.','Fazla azottan kaçının. Böcek ve külleme için haftalık tarama yapın.'],
+  ['Su ihtiyacının en yüksek olduğu dönem; eşit aralıkla verin.','Potasyum desteği verin, hastalıklı yaprak ve meyveyi bahçeden uzaklaştırın.'],
+  ['Hasada doğru suyu azaltın; aroma artar, çatlama azalır.','Olgun ürünü sık toplayın; sezon sonunda bitki artıklarını kaldırın.']],
+ yaprak:[
+  ['Yüzeyi sürekli nemli tutun; günlük hafif sulama gerekir.','Tohumu sığ ekin, üstünü ince örtün; kabuk bağlarsa yüzeyi hafifçe kırın.'],
+  ['Sık ve hafif sulayın (haftada 3-4 kez).','Sıra üzerinde seyreltme yapın, yabancı otu alın.'],
+  ['Düzenli sulayın; kuruma yaprak ucu yanığı yapar.','Azotu bölerek verin; mildiyö ve bit kontrolü yapın, sıcakta gölgeleme file kullanın.'],
+  ['Hasattan 2-3 gün önce azaltın (raf ömrü uzar).','Çiçek sapına kalkma belirtisi görürseniz hemen hasat edin.'],
+  ['Hasadı serin saatte yapın.','Yaprakları tek tek ya da dipten kesin; roka ve maydanoz yeniden sürer.']],
+ baklagil:[
+  ['Ekimde bir kez hafif sulayın, çimlenene kadar sulamayın (çürüme riski).','Toprak eşik sıcaklığa ulaştığında ekin; kuş ve kurt zararına bakın.'],
+  ['Hafif ve seyrek sulayın.','Çapa ve ot alın; sırık çeşitlerde destek verin.'],
+  ['Eşit ve orta sulayın; kuruluk veya aşırı su çiçek döker.','Azot vermeyin; pas ve antraknoz için yaprakları kontrol edin.'],
+  ['Orta-yüksek, düzenli sulama.','Bit ve kırmızı örümcek takibi yapın.'],
+  ['Hasada doğru azaltın.','Taze hasatta 2-3 günde bir toplayın, bitki yeni bakla yapar.']]};
+const DIST={
+ meyve:{N:[10,20,30,30,10],P:[50,25,15,10,0],K:[5,15,25,40,15]},
+ yaprak:{N:[20,40,30,10,0],P:[60,30,10,0,0],K:[20,40,30,10,0]},
+ baklagil:{N:[50,30,20,0,0],P:[60,20,20,0,0],K:[30,30,30,10,0]}};
+
+// ad, latin, grup, tip, t0 (gün ort. alt), t1 (üst), toprak min, fide hafta, yöntem, aşama günleri, kc, npk[Nlo,Nhi,Plo,Phi,Klo,Khi], aralık, derinlik, ph, renk, ipucu, hastalıklar
+const CROPS=[
+{id:'domates',ad:'Domates',lat:'Solanum lycopersicum',grup:'meyve',tip:'sicak',t0:15,t1:32,soil:12,fide:6,yontem:'Fide dikimi',st:[10,25,20,30,40],kc:[.6,.8,1.15,1.15,.8],npk:[15,20,8,10,15,20],aralik:'100 × 40 cm',derin:'Fideyi ilk gerçek yaprağa kadar gömün',ph:'6.0-6.8',renk:'#D8412F',ipucu:'Düzensiz sulama meyvede uç çürüklüğü yapar; destekleyin.',
+ h:[['Geç yanıklık','Phytophthora infestans','Yaprakta yağlı kahverengi lekeler, meyvede sert çürüme.','Yaprağı ıslatmayan sulama, iyi havalanma, erken koruyucu uygulama.'],['Domates güvesi','Tuta absoluta','Yaprakta galeri, meyvede delik.','Feromon tuzağı, bitki artığı imhası.'],['Erken yanıklık','Alternaria solani','Yaprakta halkalı koyu lekeler.','Münavebe, alt yaprak temizliği, dayanıklı çeşit.'],['Septoria yaprak lekesi','Septoria lycopersici','Küçük, koyu kenarlı, ortası açık yuvarlak lekeler; alt yapraklardan başlar.','Münavebe, alt yaprak temizliği, yaprağı ıslatmayan sulama.'],['Kadife yaprak küfü','Passalora fulva','Yaprak üstünde sarı lekeler, altında zeytin yeşili kadifemsi küf; seralarda yaygın.','Havalandırma, nemi düşürme, dayanıklı çeşit.'],['Kırmızı örümcek','Tetranychus urticae','Yaprakta noktasal sararma, ince ağ.','Nemi artırın, yırtıcı akar, ruhsatlı akarisit.'],['Çiçek burnu (uç) çürüklüğü','Kalsiyum eksikliği (fizyolojik)','Meyvenin çiçek ucunda önce suluboya gibi, sonra kahverengi-siyah, çökük ve deri gibi sert leke.','Düzenli ve dengeli sulama, malç, aşırı azottan kaçınma. Neden çoğunlukla toprakta kalsiyum yokluğu değil, sulama dalgalanmasıdır.']]},
+{id:'biber',ad:'Biber',lat:'Capsicum annuum',grup:'meyve',tip:'sicak',t0:17,t1:32,soil:15,fide:8,yontem:'Fide dikimi',st:[12,25,20,35,45],kc:[.6,.8,1.05,1.05,.85],npk:[12,16,8,10,12,16],aralik:'70 × 35 cm',derin:'Fideyi kabındaki derinlikte dikin',ph:'6.0-6.8',renk:'#E0882A',ipucu:'Gece 13 °C altı ve 34 °C üstü çiçek döker; sıcakta gölgeleyin.',
+ h:[['Kök boğazı çürüklüğü','Phytophthora capsici','Bitki ani solar, kök boğazı kararır.','İyi drenaj, aşırı sulamadan kaçınma, nöbetleşe ekim.'],['Yeşil şeftali yaprak biti','Myzus persicae','Yaprak kıvrılır, yapışkan salgı.','Mavi yapışkan tuzak, doğal düşman, ruhsatlı ürün.'],['Külleme','Leveillula taurica','Yaprak üstünde sarı leke, altında beyaz örtü.','Havalandırma, erken müdahale.'],['Bakteriyel leke','Xanthomonas euvesicatoria','Yaprakta küçük, sulu, sonra koyulaşan lekeler; meyvede kabarık lekeler.','Sağlam tohum, bakırlı koruma, yaprağı ıslatmayan sulama.'],['Çiçek burnu (uç) çürüklüğü','Kalsiyum eksikliği (fizyolojik)','Meyvenin çiçek ucunda önce suluboya gibi, sonra kahverengi-siyah, çökük ve deri gibi sert leke.','Düzenli ve dengeli sulama, malç, aşırı azottan kaçınma. Neden çoğunlukla toprakta kalsiyum yokluğu değil, sulama dalgalanmasıdır.']]},
+{id:'patlican',ad:'Patlıcan',lat:'Solanum melongena',grup:'meyve',tip:'sicak',t0:17,t1:33,soil:16,fide:8,yontem:'Fide dikimi',st:[12,28,20,35,45],kc:[.6,.8,1.05,1.05,.85],npk:[15,20,8,10,15,18],aralik:'90 × 50 cm',derin:'Fideyi kabındaki derinlikte dikin',ph:'6.0-6.8',renk:'#5B3A7A',ipucu:'En sıcak sever kültürlerden biri; toprak 16 °C altındaysa dikmeyin.',
+ h:[['Patates böceği','Leptinotarsa decemlineata','Yaprakları kemirir.','El ile toplama, ruhsatlı ürün.'],['Kırmızı örümcek','Tetranychus urticae','Yaprakta noktasal sararma, ince ağ.','Nemi artırın, yırtıcı akar, ruhsatlı akarisit.'],['Verticillium solgunluğu','Verticillium dahliae','Yapraklar tek taraflı solar.','3-4 yıl münavebe, dayanıklı anaç/çeşit.']]},
+{id:'salatalik',ad:'Salatalık',lat:'Cucumis sativus',grup:'meyve',tip:'sicak',t0:16,t1:32,soil:15,fide:0,yontem:'Doğrudan tohum ekimi',st:[8,20,10,20,35],kc:[.6,.8,1.0,1.0,.85],npk:[15,20,8,10,15,20],aralik:'100 × 40 cm (telli)',derin:'2-3 cm',ph:'5.8-6.8',renk:'#4F9D3C',ipucu:'Telle yukarı almak hastalığı ve çürümeyi azaltır.',
+ h:[['Külleme','Podosphaera xanthii','Yaprakta beyaz unlu örtü.','Seyrek dikim, havalandırma, ruhsatlı fungisit.'],['Mildiyö','Pseudoperonospora cubensis','Köşeli sarı lekeler, alt yüzde gri küf.','Yaprak ıslaklığını azaltın, erken koruyucu.'],['Sera beyaz sineği','Trialeurodes vaporariorum','Yaprak altında küçük beyaz böcekler.','Sarı tuzak, doğal düşman.']]},
+{id:'kabak',ad:'Kabak (sakız)',lat:'Cucurbita pepo',grup:'meyve',tip:'sicak',t0:15,t1:33,soil:14,fide:0,yontem:'Doğrudan tohum ekimi',st:[7,18,10,15,40],kc:[.5,.75,.95,.95,.8],npk:[10,14,6,8,10,14],aralik:'100 × 70 cm',derin:'3-4 cm',ph:'6.0-7.0',renk:'#8DBF4A',ipucu:'Meyveyi küçükken (15-20 cm) sık toplayın, verim artar.',
+ h:[['Külleme','Podosphaera xanthii','Yaprakta beyaz toz.','Seyrek dikim, erken müdahale.'],['Pamuk yaprak biti','Aphis gossypii','Yaprak kıvrılır, virüs taşır.','Erken tespit, doğal düşman.'],['Kök boğazı çürüklüğü','Phytophthora capsici','Kök boğazı ve meyve çürür.','Drenaj, ıslak toprakla meyve temasını önleyin.']]},
+{id:'balkabagi',ad:'Balkabağı',lat:'Cucurbita maxima',grup:'meyve',tip:'sicak',t0:15,t1:33,soil:14,fide:0,yontem:'Doğrudan tohum ekimi',st:[8,25,15,40,25],kc:[.5,.75,.95,.95,.7],npk:[8,12,5,8,8,12],aralik:'200 × 100 cm',derin:'3-5 cm',ph:'6.0-7.0',renk:'#E58A1F',ipucu:'Sap kuruyup kabuk sertleşince hasat edin; serin ve kuru yerde aylarca saklanır.',
+ h:[['Külleme','Podosphaera xanthii','Yaprakta beyaz toz.','Havalandırma, seyrek dikim.'],['Pamuk yaprak biti','Aphis gossypii','Yaprak kıvrılır.','Erken tespit, doğal düşman.'],['Kök boğazı çürüklüğü','Phytophthora capsici','Kök boğazı ve meyve çürür.','Drenaj, nöbetleşe ekim.']]},
+{id:'kavun',ad:'Kavun',lat:'Cucumis melo',grup:'meyve',tip:'sicak',t0:18,t1:34,soil:16,fide:0,yontem:'Doğrudan tohum ekimi',st:[8,25,15,35,25],kc:[.5,.75,1.0,1.0,.7],npk:[8,12,6,8,10,14],aralik:'200 × 60 cm',derin:'2-3 cm',ph:'6.0-7.0',renk:'#E3C163',ipucu:'Olgunlaşmada suyu kesmek şeker oranını yükseltir.',
+ h:[['Külleme','Podosphaera xanthii','Yaprakta beyaz toz.','Seyrek dikim, erken müdahale.'],['Fusarium solgunluğu','Fusarium oxysporum','Bitki yarım solar, damar kararır.','Dayanıklı çeşit/anaç, münavebe.'],['Pamuk yaprak biti','Aphis gossypii','Yaprak kıvrılır.','Erken tespit, doğal düşman.']]},
+{id:'karpuz',ad:'Karpuz',lat:'Citrullus lanatus',grup:'meyve',tip:'sicak',t0:18,t1:34,soil:16,fide:0,yontem:'Doğrudan tohum ekimi',st:[8,25,15,40,20],kc:[.5,.75,1.0,1.0,.75],npk:[8,12,6,8,10,14],aralik:'250 × 100 cm',derin:'3 cm',ph:'6.0-7.0',renk:'#3A8F4F',ipucu:'Kumlu-tınlı, iyi drenajlı toprak sever; meyve dolumunda düzenli su verin.',
+ h:[['Fusarium solgunluğu','Fusarium oxysporum','Sürgün solar, damar kararır.','Aşılı fide/dayanıklı çeşit, 4-5 yıl münavebe.'],['Mildiyö','Pseudoperonospora cubensis','Yaprakta sarı köşeli lekeler.','Yaprak ıslaklığını azaltın.'],['Kırmızı örümcek','Tetranychus urticae','Yaprakta sararma, ince ağ.','Sıcak-kurak dönemde izleyin.']]},
+{id:'fasulye',ad:'Fasulye',lat:'Phaseolus vulgaris',grup:'baklagil',tip:'sicak',t0:15,t1:30,soil:13,fide:0,yontem:'Doğrudan tohum ekimi',st:[7,20,10,20,15],kc:[.4,.7,1.05,1.05,.6],npk:[3,5,6,8,6,8],aralik:'60 × 10 cm (bodur)',derin:'3-4 cm',ph:'6.0-7.0',renk:'#6AAE3E',ipucu:'Havadan azot bağladığı için az azot yeter; soğuk toprakta çimlenmez.',
+ h:[['Fasulye pası','Uromyces appendiculatus','Yaprak altında kahverengi püstüller.','Münavebe, bitki artığı temizliği.'],['Antraknoz','Colletotrichum lindemuthianum','Bakla ve yaprakta çukur lekeler.','Sağlam tohum, ıslakken tarlaya girmeyin.'],['Kırmızı örümcek','Tetranychus urticae','Yaprakta sararma, ince ağ.','Sıcak-kurak dönemde izleyin.']]},
+{id:'cilek',ad:'Çilek',lat:'Fragaria × ananassa',grup:'meyve',tip:'serin',t0:9,t1:24,soil:8,fide:0,yontem:'Frigo veya saksı fidesi dikimi',st:[14,35,25,45,60],kc:[.4,.7,.85,.85,.75],npk:[8,12,6,8,10,14],aralik:'40 × 30 cm',derin:'Tepe tomurcuğu (kalp) toprak hizasında kalsın, gömmeyin',ph:'5.5-6.5',renk:'#D62E4A',ipucu:'Malç (pestil/plastik) meyvenin toprağa değmesini ve gri küfü azaltır.',
+ h:[['Gri küf','Botrytis cinerea','Meyvede gri tüylü çürüme.','Malç, havalandırma, hasta meyveyi toplayın.'],['Külleme','Podosphaera aphanis','Yaprak kenarı kıvrılır, beyaz toz.','Seyrek dikim, erken müdahale.'],['Kırmızı örümcek','Tetranychus urticae','Yaprakta bronzlaşma, ince ağ.','Yırtıcı akar, nem takibi.'],['Yaprak yanıklığı','Diplocarpon earlianum','Yaprakta mor-kırmızı küçük lekeler; sonra yaprak kurur.','Hasta yaprağı temizleyin, seyrek dikim, dayanıklı çeşit.']]},
+{id:'marul',ad:'Marul',lat:'Lactuca sativa',grup:'yaprak',tip:'serin',t0:7,t1:22,soil:5,fide:0,yontem:'Tohum veya fide',st:[7,20,20,15,10],kc:[.5,.7,1.0,1.0,.95],npk:[8,10,4,6,6,8],aralik:'30 × 25 cm',derin:'0,5-1 cm (ışıkla çimlenir)',ph:'6.0-7.0',renk:'#7DBB5B',ipucu:'22 °C üstünde çimlenme düşer, çiçek sapına kalkar; sıcakta gölgeleyin.',
+ h:[['Mildiyö','Bremia lactucae','Yaprak üstünde sarı, altında beyaz küf.','Sık dikimden kaçının, yaprak ıslaklığını azaltın.'],['Gri küf','Botrytis cinerea','Dipte ve yaprakta gri küf.','Havalandırma, aşırı sulamadan kaçının.'],['Marul biti','Nasonovia ribisnigri','Kalp yapraklarında bit kolonileri.','Erken tespit, dayanıklı çeşit.']]},
+{id:'ispanak',ad:'Ispanak',lat:'Spinacia oleracea',grup:'yaprak',tip:'serin',t0:4,t1:20,soil:4,fide:0,yontem:'Doğrudan tohum ekimi',st:[8,15,15,10,10],kc:[.5,.7,1.0,1.0,.95],npk:[8,10,3,5,5,8],aralik:'20 × 5 cm',derin:'1-2 cm',ph:'6.5-7.5',renk:'#2F7D3A',ipucu:'Soğuğa dayanıklıdır; uzun gün ve sıcakta hızla çiçek sapına kalkar.',
+ h:[['Mildiyö','Peronospora effusa','Yaprak üstünde sarı lekeler, altında mor-gri küf.','Dayanıklı çeşit, seyrek ekim.'],['Yeşil şeftali yaprak biti','Myzus persicae','Yaprak kıvrılır.','Erken tespit, doğal düşman.']]},
+{id:'roka',ad:'Roka',lat:'Eruca vesicaria',grup:'yaprak',tip:'serin',t0:5,t1:24,soil:5,fide:0,yontem:'Doğrudan tohum ekimi',st:[5,12,13,10,15],kc:[.5,.7,1.0,1.0,.9],npk:[6,8,3,4,4,6],aralik:'15 × 3 cm',derin:'0,5-1 cm',ph:'6.0-7.0',renk:'#4E9A45',ipucu:'Hızlı gelişir; 2-3 haftalık aralarla seri ekim sürekli hasat sağlar.',
+ h:[['Pire böceği','Phyllotreta cruciferae','Yaprakta küçük delikler.','Üstü örtü (böcek filesi), düzenli sulama.'],['Beyaz pas','Albugo candida','Yaprak altında beyaz püstüller.','Münavebe, bitki artığı temizliği.']]},
+{id:'maydanoz',ad:'Maydanoz',lat:'Petroselinum crispum',grup:'yaprak',tip:'serin',t0:6,t1:26,soil:7,fide:0,yontem:'Doğrudan tohum ekimi',st:[18,30,25,15,60],kc:[.5,.7,.95,.95,.9],npk:[8,10,4,6,6,8],aralik:'20 × 5 cm',derin:'0,5-1 cm; çimlenme 2-3 hafta sürer',ph:'6.0-7.0',renk:'#3F9A4A',ipucu:'Çimlenmesi yavaştır; tohumu bir gece ıslatmak hızlandırır.',
+ h:[['Septoria yaprak lekesi','Septoria petroselini','Yaprakta küçük kahverengi lekeler.','Yaprak ıslaklığını azaltın, nöbetleşe ekim.'],['Havuç biti','Cavariella aegopodii','Yaprak kıvrılır.','Erken tespit.']]},
+{id:'tere',ad:'Tere',lat:'Lepidium sativum',grup:'yaprak',tip:'serin',t0:4,t1:22,soil:4,fide:0,yontem:'Doğrudan tohum ekimi (serpme)',st:[4,7,9,6,8],kc:[.5,.7,1.0,1.0,.9],npk:[5,7,3,4,4,6],aralik:'15 × 2 cm',derin:'0,5 cm',ph:'6.0-7.0',renk:'#4E9A45',ipucu:'30 günde hasada gelir; 2 haftada bir seri ekim yapın. Sıcakta hemen tohuma kalkar.',
+ h:[['Pire böceği','Phyllotreta cruciferae','Yaprakta küçük delikler.','Böcek filesi, düzenli sulama.'],['Fide çürüklüğü','Pythium ultimum','Fideler dipten çürür, devrilir.','Drenaj, seyrek ekim, aşırı sulamadan kaçının.']]},
+{id:'dereotu',ad:'Dereotu',lat:'Anethum graveolens',grup:'yaprak',tip:'serin',t0:7,t1:26,soil:7,fide:0,yontem:'Doğrudan tohum ekimi',st:[10,20,25,15,30],kc:[.5,.7,1.0,1.0,.9],npk:[6,8,3,5,5,7],aralik:'20 × 5 cm',derin:'0,5-1 cm',ph:'6.0-7.0',renk:'#5BA24B',ipucu:'Fide nakline gelmez, yerinde yetişir. Sıcakta tohuma kalkar; 3 haftalık aralarla ekin.',
+ h:[['Külleme','Erysiphe heraclei','Yaprakta beyaz toz.','Seyrek ekim, havalandırma.'],['Havuç biti','Cavariella aegopodii','Yaprak kıvrılır.','Erken tespit, doğal düşman.']]},
+{id:'nane',ad:'Nane',lat:'Mentha spicata',grup:'yaprak',tip:'serin',t0:8,t1:28,soil:10,fide:0,yontem:'Kök sürgünü veya fide dikimi (çok yıllık)',st:[14,30,30,20,60],kc:[.5,.7,1.0,1.0,.9],npk:[8,10,4,6,6,8],aralik:'40 × 30 cm',derin:'Sürgünü 2-3 cm gömün',ph:'6.0-7.5',renk:'#3F9A4A',ipucu:'Çok yayılır; saksı veya sınırlı yatakta yetiştirin. Çiçeklenmeden önce kesmek aromayı korur.',
+ h:[['Nane pası','Puccinia menthae','Yaprak altında turuncu-kahverengi püstüller.','Havalandırma, hastalıklı yaprağı uzaklaştırın.'],['Yaprak piresi','Eupteryx melissae','Yaprakta beyaz-sarı noktalanma.','Erken tespit, sarı tuzak.']]},
+{id:'pazi',ad:'Pazı',lat:'Beta vulgaris',grup:'yaprak',tip:'serin',t0:7,t1:28,soil:6,fide:0,yontem:'Doğrudan tohum ekimi',st:[10,25,25,10,45],kc:[.5,.7,1.0,1.0,.95],npk:[10,12,4,6,6,10],aralik:'40 × 15 cm',derin:'2-3 cm',ph:'6.0-7.5',renk:'#2F7D3A',ipucu:'Dış yaprakları keserek hasat edin; bitki yeniden yaprak verir. Isıya ıspanaktan dayanıklıdır.',
+ h:[['Cercospora yaprak lekesi','Cercospora beticola','Yaprakta kırmızı kenarlı gri lekeler.','Münavebe, bitki artığı temizliği.'],['Kara pamuk biti','Aphis fabae','Genç yaprakta koyu bit kolonileri.','Erken tespit, doğal düşman.']]},
+{id:'kisnis',ad:'Kişniş',lat:'Coriandrum sativum',grup:'yaprak',tip:'serin',t0:6,t1:24,soil:6,fide:0,yontem:'Doğrudan tohum ekimi',st:[12,20,20,10,25],kc:[.5,.7,1.0,1.0,.9],npk:[6,8,3,5,5,7],aralik:'20 × 5 cm',derin:'1-1,5 cm',ph:'6.0-7.0',renk:'#5BA24B',ipucu:'Kazık kök yapar, nakil sevmez. Sıcakta çabuk tohuma kalkar; serin dönemde ekin.',
+ h:[['Külleme','Erysiphe heraclei','Yaprakta beyaz toz.','Seyrek ekim, havalandırma.'],['Havuç biti','Cavariella aegopodii','Yaprak kıvrılır.','Erken tespit.']]},
+{id:'semizotu',ad:'Semizotu',lat:'Portulaca oleracea',grup:'yaprak',tip:'sicak',t0:18,t1:36,soil:16,fide:0,yontem:'Doğrudan tohum ekimi (serpme)',st:[7,15,15,10,30],kc:[.6,.7,.9,.9,.8],npk:[5,7,3,5,5,7],aralik:'20 × 10 cm',derin:'0,5 cm (ışıkla çimlenir)',ph:'6.0-7.5',renk:'#6AAE3E',ipucu:'Sıcağı ve kuraklığı en iyi taşıyan yeşilliktir; tohumu toprağa gömmeyin, yüzeye serpip bastırın.',
+ h:[['Pamuk yaprak biti','Aphis gossypii','Yaprak kıvrılır.','Erken tespit, doğal düşman.'],['Beyaz pas','Albugo portulacae','Yaprak altında beyaz püstüller.','Seyrek ekim, ıslak yaprakla çalışmayın.']]},
+{id:'feslegen',ad:'Fesleğen',lat:'Ocimum basilicum',grup:'yaprak',tip:'sicak',t0:17,t1:34,soil:15,fide:0,yontem:'Doğrudan tohum ekimi veya fide',st:[8,20,20,15,50],kc:[.6,.8,1.0,1.0,.9],npk:[8,10,4,6,6,8],aralik:'30 × 25 cm',derin:'0,5 cm',ph:'6.0-7.0',renk:'#3F9A4A',ipucu:'Soğuğa çok duyarlıdır; çiçek tomurcuklarını koparın, yaprak üretimi sürer.',
+ h:[['Mildiyö','Peronospora belbahrii','Yaprak altında gri küf, üstte sarı lekeler.','Yaprak ıslaklığını azaltın, sağlam tohum.'],['Fusarium solgunluğu','Fusarium oxysporum','Bitki yarım solar.','Sağlam tohum, münavebe.']]},
+{id:'bezelye',ad:'Bezelye',lat:'Pisum sativum',grup:'baklagil',tip:'serin',t0:5,t1:18,soil:5,fide:0,yontem:'Doğrudan tohum ekimi',st:[10,20,15,20,12],kc:[.4,.7,1.05,1.05,.6],npk:[2,4,5,7,5,7],aralik:'50 × 5 cm',derin:'3-4 cm',ph:'6.0-7.0',renk:'#79B24B',ipucu:'Serin sever; sıcakta çiçek ve bakla tutmaz. Sırık çeşitte destek gerekir.',
+ h:[['Külleme','Erysiphe pisi','Yaprak ve baklada beyaz toz.','Erken ekim, seyrek dikim.'],['Bezelye yaprak biti','Acyrthosiphon pisum','Sürgün uçlarında bit kolonileri.','Erken tespit, doğal düşman.'],['Ascochyta yanıklığı','Ascochyta pisi','Yaprak ve baklada koyu lekeler.','Sağlam tohum, münavebe.']]}
+];
+
+// Gerçek fotoğraflar (img/ klasörü). CR: dosya -> [yazar, lisans, kaynak bağlantısı, kaynak adı]; her kültürün altında 'Fotoğraf kaynakları' olarak listelenir.
+// PH: th = sohbet düğmesi, s = aşama fotoğrafları (0 çimlenme ... 4 hasat), x = ek fotoğraflar. DPH: hastalık/zararlı latince adı -> fotoğraflar.
+const CR={"img/balkabagi-asma.jpg":["Forest and Kim Starr","CC BY 3.0 us","https://commons.wikimedia.org/wiki/File:Starr-180810-5129-Cucurbita_pepo-kabocha_butternut_hybrid_fruit_in_home_orchard-Hawea_Pl_Olinda-Maui_(43795859585).jpg","Wikimedia Commons"],"img/balkabagi-bal.jpg":["George Chernilevsky","Kamu malı","https://commons.wikimedia.org/wiki/File:Cucurbita_moschata_Butternut_2012_G2.jpg","Wikimedia Commons"],"img/balkabagi-cesit.jpg":["Californiacondor","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Squashes.jpg","Wikimedia Commons"],"img/balkabagi-hasat.jpg":["Barbara Carr","CC BY-SA 2.0","https://commons.wikimedia.org/wiki/File:Pumpkin_harvest_at_Clumber_Park_-_geograph.org.uk_-_3598303.jpg","Wikimedia Commons"],"img/balkabagi-koyu.jpg":["No machine-readable author provided. Dodo assumed (based on copyright claims).","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Pumpkin_with_stalk.jpg","Wikimedia Commons"],"img/balkabagi-meyve.jpg":["Mozzihh","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Pumpkin_2108-1292.jpg","Wikimedia Commons"],"img/bezelye-bakla.jpg":["Rasbak","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Doperwt_rijserwt_peulen_Pisum_sativum.jpg","Wikimedia Commons"],"img/bezelye-genc.jpg":["Kolforn (Kolforn) I'd appreciate if you could mail me (Kolforn@gmail.com) if you want to use this picture out of the Wik","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:2018-05-13_Pea_plants,_Northrepps,_Cromer.JPG","Wikimedia Commons"],"img/bezelye-hasat.jpg":["George Chernilevsky","Kamu malı","https://commons.wikimedia.org/wiki/File:Peas_in_pods_2016_G1.jpg","Wikimedia Commons"],"img/bezelye-seker.jpg":["Idéalités","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Sugar_snap_pea_%22Cascadia%22.jpg","Wikimedia Commons"],"img/bezelye-sira.jpg":["Kolforn (Kolforn) I'd appreciate if you could mail me (Kolforn@gmail.com) if you want to use this picture out of the Wik","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:-2020-05-19_Pea_plant_(Pisum_sativum),_Trimingham,_Norfolk_(1).JPG","Wikimedia Commons"],"img/bezelye-tane.jpg":["Bill Ebbesen","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Peas_in_pods_-_Studio.jpg","Wikimedia Commons"],"img/biber-aci.jpg":["H. Zell","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Capsicum_annuum_%27de_Cayenne%27_003.JPG","Wikimedia Commons"],"img/biber-bitki.jpg":["Forest and Kim Starr","CC BY 3.0 us","https://commons.wikimedia.org/wiki/File:Starr-101030-9376-Capsicum_annuum-habit_in_vegetable_garden-Olinda-Maui_(24688522999).jpg","Wikimedia Commons"],"img/biber-cicek.jpg":["H. Zell","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Capsicum_annuum_%27de_Cayenne%27_001.JPG","Wikimedia Commons"],"img/biber-hasat.jpg":["Kham Tran - www.khamtran.com","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Green-Yellow-Red-Pepper-2009.jpg","Wikimedia Commons"],"img/biber-kirmizi.jpg":["Mihai Oltean, Horea Muresan (Fruits-360)","MIT","https://github.com/Horea94/Fruit-Images-Dataset","GitHub"],"img/biber-saksi.jpg":["Jeff Kwapil","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Hungarian_wax_pepper_plant.jpg","Wikimedia Commons"],"img/biber-yaprak.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/biber-yesil.jpg":["Mihai Oltean, Horea Muresan (Fruits-360)","MIT","https://github.com/Horea94/Fruit-Images-Dataset","GitHub"],"img/cilek-bitki.jpg":["Shixart1985","CC BY 2.0","https://commons.wikimedia.org/wiki/File:Strawberry_plants_with_ripe_and_unripe_fruit_growing_in_a_garden.jpg","Wikimedia Commons"],"img/cilek-ham.jpg":["Mihai Oltean, Horea Muresan (Fruits-360)","MIT","https://github.com/Horea94/Fruit-Images-Dataset","GitHub"],"img/cilek-hasat.jpg":["Marc-Lautenbacher","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Organic-strawberries_Canada.jpg","Wikimedia Commons"],"img/cilek-kirmizi.jpg":["Mihai Oltean, Horea Muresan (Fruits-360)","MIT","https://github.com/Horea94/Fruit-Images-Dataset","GitHub"],"img/cilek-ortu.jpg":["Almostway2004","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Strawberry_bush.jpg","Wikimedia Commons"],"img/cilek-tarla.jpg":[".mw-parser-output .commons-creator-table{background-color:#f0f0ff;box-sizing:border-box;font-size:95%;text-align:start;c","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:D%C3%BClmen,_Kirchspiel,_Erdbeerfeld_--_2015_--_6492-6.jpg","Wikimedia Commons"],"img/cilek-yaprak.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/dereotu.jpg":["Bff","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Anethum_graveolens20090812_475.jpg","Wikimedia Commons"],"img/domates-bitki.jpg":["Tulspal","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Tomato_plants_in_home_garden.jpg","Wikimedia Commons"],"img/domates-cicek.jpg":["AUAgroup (Atina Tarım Üniversitesi), early-crop-weed veri seti","MIT","https://github.com/AUAgroup/early-crop-weed","GitHub"],"img/domates-cicek2.jpg":["AUAgroup (Atina Tarım Üniversitesi), early-crop-weed veri seti","MIT","https://github.com/AUAgroup/early-crop-weed","GitHub"],"img/domates-fide.jpg":["AUAgroup (Atina Tarım Üniversitesi), early-crop-weed veri seti","MIT","https://github.com/AUAgroup/early-crop-weed","GitHub"],"img/domates-genc.jpg":["AUAgroup (Atina Tarım Üniversitesi), early-crop-weed veri seti","MIT","https://github.com/AUAgroup/early-crop-weed","GitHub"],"img/domates-hasat.jpg":["George Chernilevsky","CC BY 4.0","https://commons.wikimedia.org/wiki/File:Tomatoes_2026_G1.jpg","Wikimedia Commons"],"img/domates-kirmizi.jpg":["Mihai Oltean, Horea Muresan (Fruits-360)","MIT","https://github.com/Horea94/Fruit-Images-Dataset","GitHub"],"img/domates-saksi.jpg":["George Chernilevsky","CC BY 4.0","https://commons.wikimedia.org/wiki/File:Tomato_plant_2026_G2.jpg","Wikimedia Commons"],"img/domates-sera.jpg":["Goldlocki","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Tomato_P5260299b.jpg","Wikimedia Commons"],"img/domates-tarla.jpg":["AUAgroup (Atina Tarım Üniversitesi), early-crop-weed veri seti","MIT","https://github.com/AUAgroup/early-crop-weed","GitHub"],"img/domates-yaprak.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/domates-yesil.jpg":["Mihai Oltean, Horea Muresan (Fruits-360)","MIT","https://github.com/Horea94/Fruit-Images-Dataset","GitHub"],"img/fasulye-bakla.jpg":["Forest and Kim Starr","CC BY 3.0 us","https://commons.wikimedia.org/wiki/File:Starr-081009-0048-Phaseolus_vulgaris-beans-Makawao-Maui_(24925870825).jpg","Wikimedia Commons"],"img/fasulye-destek.jpg":["Forest and Kim Starr","CC BY 3.0 us","https://commons.wikimedia.org/wiki/File:Starr-080914-9906-Phaseolus_vulgaris-in_garden-Makawao-Maui_(24807579342).jpg","Wikimedia Commons"],"img/fasulye-genc.jpg":["Kolforn (Kolforn) I'd appreciate if you could mail me (Kolforn@gmail.com) if you want to use this picture out of the Wik","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:-2020-06-24_Dwarf_french_beans_(Phaseolus_vulgaris),_Trimingham,_Norfolk.JPG","Wikimedia Commons"],"img/fasulye-hasat.jpg":["16:9clue","CC BY 2.0","https://commons.wikimedia.org/wiki/File:Green_beans_169clue.jpg","Wikimedia Commons"],"img/fasulye-sira.jpg":["Forest and Kim Starr","CC BY 3.0 us","https://commons.wikimedia.org/wiki/File:Starr-090421-6288-Phaseolus_vulgaris-crop-Pukalani-Maui_(24926120406).jpg","Wikimedia Commons"],"img/fasulye-yassi.jpg":["Christopher Franz","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Four_Different_Varieties_of_Green_Beans_(Phaseolus_vulgaris).jpg","Wikimedia Commons"],"img/feslegen-bitki.jpg":["PumpkinSky","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Ocimum_basilicum_CG_NBG_LR.jpg","Wikimedia Commons"],"img/feslegen-genc.jpg":["Photo by David J. Stang","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Ocimum_basilicum_8zz.jpg","Wikimedia Commons"],"img/feslegen-hasat.jpg":["Paul Goyette","CC BY-SA 2.0","https://commons.wikimedia.org/wiki/File:Basil_leaves.jpg","Wikimedia Commons"],"img/feslegen-surgun.jpg":["Forest and Kim Starr","CC BY 3.0 us","https://commons.wikimedia.org/wiki/File:Starr-090707-2398-Ocimum_basilicum-leaves-Olinda-Maui_(24969058135).jpg","Wikimedia Commons"],"img/feslegen-yaprak.jpg":["Forest and Kim Starr","CC BY 3.0 us","https://commons.wikimedia.org/wiki/File:Starr-090519-8066-Ocimum_basilicum-leaves-Native_Nursery_Kula-Maui_(24588096799).jpg","Wikimedia Commons"],"img/hd-bakteri-1.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-bakteri-2.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-beyazsinek-1.jpg":["Mike Bowie","CC BY 4.0","https://www.inaturalist.org/photos/323385463","iNaturalist"],"img/hd-beyazsinek-2.jpg":["Michele Jones","CC BY 4.0","https://www.inaturalist.org/photos/242186163","iNaturalist"],"img/hd-bit-1.jpg":["W Rao","CC BY 4.0","https://www.inaturalist.org/photos/370477723","iNaturalist"],"img/hd-bit-2.jpg":["Erik Steenkamp","CC0","https://www.inaturalist.org/photos/427754816","iNaturalist"],"img/hd-cilekyanik-1.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-cilekyanik-2.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-erkenyanik-1.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-erkenyanik-2.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-gecyanik-1.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-gecyanik-2.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-kuf-1.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-kuf-2.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-kulleme-1.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-kulleme-2.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-kulleme-v1.jpg":["Plant pests and diseases","CC0","https://www.flickr.com/photos/62295966@N07/16488048256","Flickr"],"img/hd-kulleme-v2.jpg":["Plant pests and diseases","CC0","https://www.flickr.com/photos/62295966@N07/15357500783","Flickr"],"img/hd-orumcek-1.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-orumcek-2.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-orumcek-v1.jpg":["Mike Bowie","CC BY 4.0","https://www.inaturalist.org/photos/152879740","iNaturalist"],"img/hd-pire-1.jpg":["Andrew Meeds","CC BY 4.0","https://www.inaturalist.org/photos/246243275","iNaturalist"],"img/hd-pire-2.jpg":["Helio Lourencini","CC BY 4.0","https://www.inaturalist.org/photos/111654398","iNaturalist"],"img/hd-septoria-1.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-septoria-2.jpg":["Hughes ve Salathé (PlantVillage)","ticari olmayan kullanım","https://github.com/spMohanty/PlantVillage-Dataset","GitHub"],"img/hd-ucurume-1.jpg":["Plant pests and diseases","CC0","https://www.flickr.com/photos/62295966@N07/5836882746","Flickr"],"img/hd-ucurume-2.jpg":["Plant pests and diseases","CC0","https://www.flickr.com/photos/62295966@N07/9737392836","Flickr"],"img/ispanak-genc.jpg":["Rasbak","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Spinacia_oleracea_Breedblad_scherpzaad.jpg","Wikimedia Commons"],"img/ispanak-hasat.jpg":["Nillerdk","CC BY 3.0","https://commons.wikimedia.org/wiki/File:Spinach_leaves.jpg","Wikimedia Commons"],"img/ispanak-rozet.jpg":["Алексей Тараканов","CC BY-SA 2.0","https://commons.wikimedia.org/wiki/File:Spinacia_oleracea_(51364931334).jpg","Wikimedia Commons"],"img/ispanak-taze.jpg":["HaJunkiyada","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Liat_Portal_for_Foodie_Disorder_-_Fresh_spinach_leaves.jpg","Wikimedia Commons"],"img/ispanak-yaprak.jpg":["ThiloBecker","CC0","https://commons.wikimedia.org/wiki/File:Spinach_Plant_Nourishment_Meal_Fresh_Healthy_Bio.jpg","Wikimedia Commons"],"img/kabak-cicek.jpg":["Kolforn (Kolforn) I'd appreciate if you could mail me (Kolforn@gmail.com) if you want to use this picture out of the Wik","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:-2019-07-02_Forming_fruit,_courgette,_Trimingham,_Norfolk_(1).JPG","Wikimedia Commons"],"img/kabak-cizgili.jpg":["Evan-Amos","Kamu malı","https://commons.wikimedia.org/wiki/File:CSA-Striped-Zucchini.jpg","Wikimedia Commons"],"img/kabak-genc.jpg":["Kolforn (Kolforn) I'd appreciate if you could mail me (Kolforn@gmail.com) if you want to use this picture out of the Wik","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:-2020-06-02_Courgette_plant_(Cucurbita_pepo),_Trimingham,_Norfolk.JPG","Wikimedia Commons"],"img/kabak-hasat.jpg":["nociveglia from Appennino Emiliano, Italy","CC BY 2.0","https://commons.wikimedia.org/wiki/File:Cucurbita_pepo_zucchine_and_tondo.jpg","Wikimedia Commons"],"img/kabak-meyve.jpg":["Rasbak","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Courgette_plant_%27Diamant%27.jpg","Wikimedia Commons"],"img/kabak-yatak.jpg":["Kolforn (Kolforn) I'd appreciate if you could mail me (Kolforn@gmail.com) if you want to use this picture out of the Wik","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:-2020-06-23_Raised_bed_of_Courgette_plants,_Trimingham,_Norfolk.JPG","Wikimedia Commons"],"img/karpuz-dilim.jpg":["Don miraj","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Watermelon001.jpg","Wikimedia Commons"],"img/karpuz-genc.jpg":["-JvL- from Netherlands","CC BY 2.0","https://commons.wikimedia.org/wiki/File:Watermelon_plant_(32714113924).jpg","Wikimedia Commons"],"img/karpuz-hasat.jpg":["Shams948","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Watermelon_Bahar1.jpg","Wikimedia Commons"],"img/karpuz-meyve.jpg":["Fred Hsu (Wikipedia:User:Fred Hsu on en.wikipedia)","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Taiwan_2009_Tainan_City_Organic_Farm_Watermelon_FRD_7962.jpg","Wikimedia Commons"],"img/karpuz.jpg":["Mihai Oltean, Horea Muresan (Fruits-360)","MIT","https://github.com/Horea94/Fruit-Images-Dataset","GitHub"],"img/kavun-2.jpg":["Mihai Oltean, Horea Muresan (Fruits-360)","MIT","https://github.com/Horea94/Fruit-Images-Dataset","GitHub"],"img/kavun-asma.jpg":["Rob Duval","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Cantaloupe_plant.JPG","Wikimedia Commons"],"img/kavun-hasat.jpg":["Forest and Kim Starr","CC BY 3.0 us","https://commons.wikimedia.org/wiki/File:Starr-080914-9945-Cucumis_melo-cantaloupe_fruit-Makawao-Maui_(24832297641).jpg","Wikimedia Commons"],"img/kavun-kesit.jpg":["Judgefloro","CC0","https://commons.wikimedia.org/wiki/File:7716Cuisine_fruits_of_Bulacan_14.jpg","Wikimedia Commons"],"img/kavun-meyve.jpg":["Rasbak at Dutch Wikipedia","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Meloen_vrucht_met_bloem.jpg","Wikimedia Commons"],"img/kavun.jpg":["Mihai Oltean, Horea Muresan (Fruits-360)","MIT","https://github.com/Horea94/Fruit-Images-Dataset","GitHub"],"img/kisnis.jpg":["Thamizhpparithi Maari","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:A_scene_of_Coriander_leaves.JPG","Wikimedia Commons"],"img/marul-bas.jpg":["AfroBrazilian","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Lactuca_sativa_02.JPG","Wikimedia Commons"],"img/marul-g10.jpg":["wsnook (lettuce-dataset-1)","CC BY-SA 4.0","https://github.com/ic/lettuce-dataset-1","GitHub"],"img/marul-g13.jpg":["wsnook (lettuce-dataset-1)","CC BY-SA 4.0","https://github.com/ic/lettuce-dataset-1","GitHub"],"img/marul-g17.jpg":["wsnook (lettuce-dataset-1)","CC BY-SA 4.0","https://github.com/ic/lettuce-dataset-1","GitHub"],"img/marul-g22.jpg":["wsnook (lettuce-dataset-1)","CC BY-SA 4.0","https://github.com/ic/lettuce-dataset-1","GitHub"],"img/marul-g27.jpg":["wsnook (lettuce-dataset-1)","CC BY-SA 4.0","https://github.com/ic/lettuce-dataset-1","GitHub"],"img/marul-g31.jpg":["wsnook (lettuce-dataset-1)","CC BY-SA 4.0","https://github.com/ic/lettuce-dataset-1","GitHub"],"img/marul-hasat.jpg":["Dwight Sipler from Stow, MA, USA","CC BY 2.0","https://commons.wikimedia.org/wiki/File:Lettuce_Mini_Heads_(7331119710).jpg","Wikimedia Commons"],"img/marul-tarla.jpg":["MaedaAkihiko","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Leaf-Lettuce-field.jpg","Wikimedia Commons"],"img/maydanoz.jpg":["H. Zell","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Petroselinum_crispum_003.JPG","Wikimedia Commons"],"img/nane.jpg":["Commonists","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Mint_leaves_(Mentha_spicata).jpg","Wikimedia Commons"],"img/patlican-bitki.jpg":["Koamivict","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Aubergine_fruit_et_plante_04.jpg","Wikimedia Commons"],"img/patlican-cesit.jpg":["Grey Geezer","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Aubergine-Varianten.JPG","Wikimedia Commons"],"img/patlican-genc.jpg":["Forest and Kim Starr","CC BY 3.0 us","https://commons.wikimedia.org/wiki/File:Starr-090801-3511-Solanum_melongena-habit_in_garden-Olinda-Maui_(24852904722).jpg","Wikimedia Commons"],"img/patlican-hasat.jpg":["Kiensvay","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Eggplant_-_%E1%9E%8F%E1%9F%92%E1%9E%9A%E1%9E%94%E1%9F%8B%E1%9E%9F%E1%9E%8E%E1%9F%92%E1%9E%8A%E1%9E%B6%E1%9E%99.JPG","Wikimedia Commons"],"img/patlican-meyve.jpg":["Joydeep","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Solanum_melongena_24_08_2012_(1).JPG","Wikimedia Commons"],"img/patlican.jpg":["Mihai Oltean, Horea Muresan (Fruits-360)","MIT","https://github.com/Horea94/Fruit-Images-Dataset","GitHub"],"img/pazi-genc.jpg":["Acabashi","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Swiss_chard_Beta_vulgaris_and_onion_Capel_Manor_College_Gardens_Enfield_London_England_02.jpg","Wikimedia Commons"],"img/pazi-hasat.jpg":["Syp","Kamu malı","https://commons.wikimedia.org/wiki/File:M%C3%A1ngoldsz%C3%A1rak_%C3%A9s_levelek.JPG","Wikimedia Commons"],"img/pazi-kirmizi.jpg":["August Geyler","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Bl%C3%A4tter_vom_Roten_Mangold_(Chard).jpg","Wikimedia Commons"],"img/pazi-rozet.jpg":["Neelix at English Wikipedia","Kamu malı","https://commons.wikimedia.org/wiki/File:Chard_(Beta_vulgaris_var_cicla).jpg","Wikimedia Commons"],"img/pazi-yaprak.jpg":[".mw-parser-output .commons-creator-table{background-color:#f0f0ff;box-sizing:border-box;font-size:95%;text-align:start;c","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:M%C3%BCnster,_Botanischer_Garten,_Mangold_--_2019_--_7382.jpg","Wikimedia Commons"],"img/salatalik-asma.jpg":["DenesFeri","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Cucurbitales_-_Cucumis_sativus_3.jpg","Wikimedia Commons"],"img/salatalik-boy.jpg":["Andy / Andrew Fogg from near Cambridge, UK","CC BY 2.0","https://commons.wikimedia.org/wiki/File:A_Cucumber_(99209794).jpg","Wikimedia Commons"],"img/salatalik-cicek.jpg":["H. Zell","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Cucumis_sativus_0001.JPG","Wikimedia Commons"],"img/salatalik-hasat.jpg":["Pascal Kings","CC BY 4.0","https://commons.wikimedia.org/wiki/File:Cucumber_plants.jpg","Wikimedia Commons"],"img/salatalik-meyve.jpg":["Stephen Ausmus, USDA ARS","Kamu malı","https://commons.wikimedia.org/wiki/File:ARS_cucumber.jpg","Wikimedia Commons"],"img/salatalik-sera.jpg":["Pascal Kings","CC BY 4.0","https://commons.wikimedia.org/wiki/File:Cucumber_plants_4.jpg","Wikimedia Commons"],"img/th-salatalik.jpg":["Pascal Kings","CC BY 4.0","https://commons.wikimedia.org/wiki/File:Cucumber_plants.jpg","Wikimedia Commons"],"img/th-kabak.jpg":["nociveglia from Appennino Emiliano, Italy","CC BY 2.0","https://commons.wikimedia.org/wiki/File:Cucurbita_pepo_zucchine_and_tondo.jpg","Wikimedia Commons"],"img/th-balkabagi.jpg":["Infrogmation of New Orleans","CC BY-SA 2.0","https://commons.wikimedia.org/wiki/File:FrenchMarketPumpkinsB.jpg","Wikimedia Commons"],"img/th-fasulye.jpg":["16:9clue","CC BY 2.0","https://commons.wikimedia.org/wiki/File:Green_beans_169clue.jpg","Wikimedia Commons"],"img/th-bezelye.jpg":["Bill Ebbesen","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Peas_in_pods_-_Studio.jpg","Wikimedia Commons"],"img/th-marul.jpg":["Prenn","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Lactuca_sativa_var._(2).jpg","Wikimedia Commons"],"img/th-ispanak.jpg":["ThiloBecker","CC0","https://commons.wikimedia.org/wiki/File:Spinach_Plant_Nourishment_Meal_Fresh_Healthy_Bio.jpg","Wikimedia Commons"],"img/th-pazi.jpg":["Syp","Kamu malı","https://commons.wikimedia.org/wiki/File:M%C3%A1ngoldsz%C3%A1rak_%C3%A9s_levelek.JPG","Wikimedia Commons"],"img/th-feslegen.jpg":["PumpkinSky","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Ocimum_basilicum_CG_NBG_LR.jpg","Wikimedia Commons"],"img/th-maydanoz.jpg":["H. Zell","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Petroselinum_crispum_003.JPG","Wikimedia Commons"],"img/th-nane.jpg":["Commonists","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Mint_leaves_(Mentha_spicata).jpg","Wikimedia Commons"],"img/th-dereotu.jpg":["Bff","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:Anethum_graveolens20090812_475.jpg","Wikimedia Commons"],"img/th-kisnis.jpg":["Thamizhpparithi Maari","CC BY-SA 3.0","https://commons.wikimedia.org/wiki/File:A_scene_of_Coriander_leaves.JPG","Wikimedia Commons"]};
+const PH={"domates":{"th":"img/domates-kirmizi.jpg","s":[["img/domates-fide.jpg","Dikimden sonra tutunan genç domates fidesi (tarla)"],["img/domates-genc.jpg","Genç domates bitkisi: yaprak ve sürgün gelişimi (tarla)"],["img/domates-cicek2.jpg","İlk sarı çiçeklerini açan domates bitkisi (tarla, damla sulama hattı yanında)"],["img/domates-bitki.jpg","Meyve tutan domates bitkisi: yeşil meyveler, biri dönmeye başlamış"],["img/domates-hasat.jpg","Olgun domatesler dalında"]],"x":[["img/domates-cicek.jpg","Çiçeklenme başlangıcında domates, yakın plan (tarla)"],["img/domates-tarla.jpg","Çiçek tomurcuklarıyla domates bitkisi (tarla)"],["img/domates-yaprak.jpg","Sağlıklı domates yaprağı (tek yaprak)"],["img/domates-saksi.jpg","Saksıda yetişen cüce domates"],["img/domates-sera.jpg","Serada sıra sıra domates"],["img/domates-yesil.jpg","Olgunlaşmamış (yeşil) domates, stüdyo çekimi"],["img/domates-kirmizi.jpg","Olgun domates, stüdyo çekimi"]],"g":[["img/domates-fide.jpg","Dikimden sonra tutunan genç domates fidesi (tarla)"],["img/domates-genc.jpg","Genç domates bitkisi: yaprak ve sürgün gelişimi (tarla)"],["img/domates-cicek2.jpg","İlk sarı çiçeklerini açan domates bitkisi (tarla, damla sulama hattı yanında)"],["img/domates-cicek.jpg","Çiçeklenme başlangıcında domates, yakın plan (tarla)"],["img/domates-tarla.jpg","Çiçek tomurcuklarıyla domates bitkisi (tarla)"],["img/domates-bitki.jpg","Meyve tutan domates bitkisi: yeşil meyveler, biri dönmeye başlamış"],["img/domates-hasat.jpg","Olgun domatesler dalında"],["img/domates-saksi.jpg","Saksıda yetişen cüce domates"],["img/domates-sera.jpg","Serada sıra sıra domates"],["img/domates-yaprak.jpg","Sağlıklı domates yaprağı (tek yaprak)"],["img/domates-yesil.jpg","Olgunlaşmamış (yeşil) domates, stüdyo çekimi"],["img/domates-kirmizi.jpg","Olgun domates, stüdyo çekimi"]]},"biber":{"th":"img/biber-kirmizi.jpg","s":[null,["img/biber-yaprak.jpg","Sağlıklı biber yaprağı"],["img/biber-cicek.jpg","Çiçek açan biber bitkisi (solda beyaz çiçek)"],["img/biber-bitki.jpg","Meyve tutan biber bitkisi: yeşil biber sarkıyor"],["img/biber-hasat.jpg","Yeşil, sarı ve kırmızı dolmalık biberler"]],"x":[["img/biber-saksi.jpg","Saksıda yetişen biber"],["img/biber-aci.jpg","Dalında olgunlaşan acı biberler"],["img/biber-yesil.jpg","Yeşil (ham) biber, stüdyo çekimi"],["img/biber-kirmizi.jpg","Olgun kırmızı biber, stüdyo çekimi"]]},"patlican":{"th":"img/patlican.jpg","s":[null,["img/patlican-genc.jpg","Genç patlıcan bitkisi: yaprak gelişimi"],null,["img/patlican-meyve.jpg","Dalında gelişen patlıcanlar"],["img/patlican-hasat.jpg","Olgun uzun patlıcanlar"]],"x":[["img/patlican-bitki.jpg","Tarlada meyveli patlıcan bitkisi"],["img/patlican-cesit.jpg","Çizgili, siyah ve beyaz patlıcan çeşitleri"],["img/patlican.jpg","Olgun patlıcan, stüdyo çekimi"]]},"salatalik":{"th":"img/th-salatalik.jpg","s":[null,["img/salatalik-sera.jpg","Serada salatalık sıraları: vejetatif büyüme"],["img/salatalik-cicek.jpg","Çiçek açan salatalık (sarı çiçek)"],["img/salatalik-meyve.jpg","Dalında meyve tutan salatalıklar, sarı çiçek de görünüyor"],["img/salatalik-hasat.jpg","Hasat edilmiş salatalıklar"]],"x":[["img/salatalik-asma.jpg","Destekle yetiştirilen salatalık asması"],["img/salatalik-boy.jpg","Tek salatalık, cetvelle boyu"]]},"kabak":{"th":"img/th-kabak.jpg","s":[null,["img/kabak-genc.jpg","Toprakta genç kabak bitkileri"],["img/kabak-cicek.jpg","Açmış sarı kabak çiçekleri"],["img/kabak-meyve.jpg","Kabak bitkisi: meyve ve çiçek bir arada"],["img/kabak-hasat.jpg","Hasat edilmiş yeşil ve sarı kabaklar"]],"x":[["img/kabak-yatak.jpg","Yükseltilmiş yatakta kabak bitkileri"],["img/kabak-cizgili.jpg","Çizgili yeşil kabak"]]},"balkabagi":{"th":"img/th-balkabagi.jpg","s":[null,["img/balkabagi-asma.jpg","Balkabağı asması: yaprak ve sürgün gelişimi, küçük bir meyve belirmiş"],null,["img/balkabagi-meyve.jpg","Yerde olgunlaşan kırmızı kabuklu balkabağı"],["img/balkabagi-hasat.jpg","Hasat edilmiş iri balkabakları"]],"x":[["img/balkabagi-koyu.jpg","Asmada sarkan koyu yeşil kabuklu balkabağı"],["img/balkabagi-bal.jpg","Butternut tipi kış kabağı, ortadan kesilmiş"],["img/balkabagi-cesit.jpg","Farklı kış kabağı çeşitleri"]]},"kavun":{"th":"img/kavun.jpg","s":[null,["img/kavun-asma.jpg","Kavun asması: vejetatif büyüme"],null,["img/kavun-meyve.jpg","Kavun: çiçek ve gelişen meyve bir arada"],["img/kavun-hasat.jpg","Asmada olgunlaşan kavun"]],"x":[["img/kavun-kesit.jpg","Kesilmiş kavun"],["img/kavun.jpg","Olgun kavun (kantalup tipi), stüdyo çekimi"],["img/kavun-2.jpg","Kavun (yeşil kabuklu tip), stüdyo çekimi"]]},"karpuz":{"th":"img/karpuz.jpg","s":[null,["img/karpuz-genc.jpg","Genç karpuz fidesi: loblu yapraklar"],null,["img/karpuz-meyve.jpg","Asmada gelişen genç karpuz"],["img/karpuz-hasat.jpg","Tarlada olgunlaşan karpuzlar"]],"x":[["img/karpuz-dilim.jpg","Kesilmiş karpuz"],["img/karpuz.jpg","Olgun karpuz, stüdyo çekimi"]]},"cilek":{"th":"img/cilek-kirmizi.jpg","s":[null,["img/cilek-yaprak.jpg","Sağlıklı çilek yaprağı"],null,["img/cilek-bitki.jpg","Ham (beyaz) ve olgun (kırmızı) çilekler aynı bitkide"],["img/cilek-hasat.jpg","Hasat edilmiş çilekler"]],"x":[["img/cilek-ortu.jpg","Çilek bitkileri: yaprak örtüsü"],["img/cilek-tarla.jpg","Çilek tarlası, sıralar"],["img/cilek-ham.jpg","Olgunlaşmamış çilek, stüdyo çekimi"],["img/cilek-kirmizi.jpg","Olgun çilek, stüdyo çekimi"]]},"fasulye":{"th":"img/th-fasulye.jpg","s":[null,["img/fasulye-genc.jpg","Sırığa tırmanan genç fasulye bitkileri"],null,["img/fasulye-bakla.jpg","Bakla oluşumu: bitkide sarkan fasulye baklası"],["img/fasulye-hasat.jpg","Hasat edilmiş taze fasulye"]],"x":[["img/fasulye-destek.jpg","Bambu desteklere sarılan fasulye"],["img/fasulye-sira.jpg","Damla sulamalı fasulye sırası"],["img/fasulye-yassi.jpg","Farklı fasulye baklaları"]]},"bezelye":{"th":"img/th-bezelye.jpg","s":[null,["img/bezelye-genc.jpg","Destekle yetiştirilen genç bezelye bitkileri"],null,["img/bezelye-bakla.jpg","Bakla oluşumu: bitkide dolgunlaşan bezelye baklaları"],["img/bezelye-hasat.jpg","Hasat edilmiş bezelye baklaları"]],"x":[["img/bezelye-sira.jpg","Yükseltilmiş yatakta sırık bezelye"],["img/bezelye-tane.jpg","Açılmış baklada bezelye taneleri"],["img/bezelye-seker.jpg","Şeker (çıtır) bezelye baklaları"]]},"marul":{"th":"img/th-marul.jpg","s":[["img/marul-g10.jpg","10. gün: kubbe altında çıkan fideler (cam buğulu)"],["img/marul-g13.jpg","13. gün: ilk gerçek yapraklar"],["img/marul-g17.jpg","17. gün: yapraklar açılıyor"],["img/marul-g27.jpg","27. gün: baş oluşturan marul"],["img/marul-hasat.jpg","Bahçede hasada gelmiş baş marullar"]],"x":[["img/marul-g22.jpg","22. gün: yaprakları kıvrılan marul"],["img/marul-g31.jpg","31. gün: hasat boyunda marul"],["img/marul-bas.jpg","Tarlada baş bağlayan marul"],["img/marul-tarla.jpg","Plastik malçlı marul tarlası"]],"g":[["img/marul-g10.jpg","10. gün: kubbe altında çıkan fideler (cam buğulu)"],["img/marul-g13.jpg","13. gün: ilk gerçek yapraklar"],["img/marul-g17.jpg","17. gün: yapraklar açılıyor"],["img/marul-g22.jpg","22. gün: yaprakları kıvrılan marul"],["img/marul-g27.jpg","27. gün: baş oluşturan marul"],["img/marul-g31.jpg","31. gün: hasat boyunda marul"],["img/marul-hasat.jpg","Bahçede hasada gelmiş baş marullar"],["img/marul-bas.jpg","Tarlada baş bağlayan marul"],["img/marul-tarla.jpg","Plastik malçlı marul tarlası"]],"note":"Gün sayıları, 17 Nisan 2017'de ekilen hidroponik (AeroGarden) karışık salata marulunun zaman atlamalı karelerinden alındı; açık alanda süreler iklime göre değişir."},"ispanak":{"th":"img/th-ispanak.jpg","s":[null,["img/ispanak-genc.jpg","Sık ekilmiş genç ıspanak"],["img/ispanak-rozet.jpg","Rozet oluşturan ıspanak"],["img/ispanak-yaprak.jpg","Olgun ıspanak yaprakları, yakın çekim"],["img/ispanak-hasat.jpg","Hasat edilmiş ıspanak"]],"x":[["img/ispanak-taze.jpg","Taze ıspanak yaprakları"]]},"pazi":{"th":"img/th-pazi.jpg","s":[null,["img/pazi-genc.jpg","Yükseltilmiş yatakta genç pazı (kırmızı ve beyaz saplı)"],["img/pazi-rozet.jpg","Kırmızı saplı pazı bitkisi"],["img/pazi-yaprak.jpg","Olgun pazı yaprağı: sarı damar ve sap"],["img/pazi-hasat.jpg","Hasat edilmiş pazı: kırmızı, sarı ve beyaz saplar"]],"x":[["img/pazi-kirmizi.jpg","Kırmızı damarlı pazı yaprağı"]],"note":"Fotoğraflardaki renkli saplı pazı çeşitleri, bizdeki beyaz saplı pazıyla aynı türdür (Beta vulgaris)."},"feslegen":{"th":"img/th-feslegen.jpg","s":[null,["img/feslegen-genc.jpg","Genç fesleğen bitkileri"],["img/feslegen-yaprak.jpg","Yaprak gelişimi: sık dallanan fesleğen"],["img/feslegen-surgun.jpg","Olgun sürgün: iri yapraklar"],["img/feslegen-hasat.jpg","Hasada hazır yapraklar"]],"x":[["img/feslegen-bitki.jpg","Fesleğen (Ocimum basilicum) bitkisi"]]},"maydanoz":{"th":"img/th-maydanoz.jpg","s":[null,null,null,null,["img/maydanoz.jpg","Yassı yapraklı maydanoz"]],"x":[]},"nane":{"th":"img/th-nane.jpg","s":[null,null,null,null,["img/nane.jpg","Nane (Mentha spicata) sürgünleri"]],"x":[]},"dereotu":{"th":"img/th-dereotu.jpg","s":[null,null,null,["img/dereotu.jpg","Çiçeğe kalkmış dereotu: sarı çiçek şemsiyesi"],null],"x":[]},"kisnis":{"th":"img/th-kisnis.jpg","s":[null,null,null,null,["img/kisnis.jpg","Kişniş yaprakları"]],"x":[]}};
+const DPH={"Phytophthora infestans":[["img/hd-gecyanik-1.jpg","Domates yaprağı"],["img/hd-gecyanik-2.jpg","Domates yaprağı"]],"Alternaria solani":[["img/hd-erkenyanik-1.jpg","Domates yaprağı"],["img/hd-erkenyanik-2.jpg","Domates yaprağı"]],"Septoria lycopersici":[["img/hd-septoria-1.jpg","Domates yaprağı"],["img/hd-septoria-2.jpg","Domates yaprağı"]],"Passalora fulva":[["img/hd-kuf-1.jpg","Domates yaprağı"],["img/hd-kuf-2.jpg","Domates yaprağı"]],"Tetranychus urticae":[["img/hd-orumcek-v1.jpg","Yaprakta kırmızı örümcek (genel örnek)"],["img/hd-orumcek-1.jpg","Domates yaprağında zarar belirtisi"],["img/hd-orumcek-2.jpg","Domates yaprağında zarar belirtisi"]],"Xanthomonas euvesicatoria":[["img/hd-bakteri-1.jpg","Biber yaprağı"],["img/hd-bakteri-2.jpg","Biber yaprağı"]],"Podosphaera xanthii":[["img/hd-kulleme-v1.jpg","Yaprakta külleme: beyaz toz örtü (kabak yaprağı)"],["img/hd-kulleme-v2.jpg","Külleme bulaşmış yaprak (balkabağı)"],["img/hd-kulleme-1.jpg","Kabak yaprağında külleme"],["img/hd-kulleme-2.jpg","Kabak yaprağında külleme"]],"Leveillula taurica":[["img/hd-kulleme-v1.jpg","Külleme (kabak yaprağında örnek; belirti konukçuya göre değişir)"],["img/hd-kulleme-v2.jpg","Külleme (balkabağı yaprağında örnek)"]],"Podosphaera aphanis":[["img/hd-kulleme-v1.jpg","Külleme (kabak yaprağında örnek; belirti konukçuya göre değişir)"],["img/hd-kulleme-v2.jpg","Külleme (balkabağı yaprağında örnek)"]],"Erysiphe heraclei":[["img/hd-kulleme-v1.jpg","Külleme (kabak yaprağında örnek; belirti konukçuya göre değişir)"],["img/hd-kulleme-v2.jpg","Külleme (balkabağı yaprağında örnek)"]],"Erysiphe pisi":[["img/hd-kulleme-v1.jpg","Külleme (kabak yaprağında örnek; belirti konukçuya göre değişir)"],["img/hd-kulleme-v2.jpg","Külleme (balkabağı yaprağında örnek)"]],"Diplocarpon earlianum":[["img/hd-cilekyanik-1.jpg","Çilek yaprağı"],["img/hd-cilekyanik-2.jpg","Çilek yaprağı"]],"Myzus persicae":[["img/hd-bit-1.jpg","Yaprak biti kolonisi (genel örnek; tür farklı olabilir)"],["img/hd-bit-2.jpg","Yaprak biti bulaşmış bitki (genel örnek)"]],"Aphis gossypii":[["img/hd-bit-1.jpg","Yaprak biti kolonisi (genel örnek; tür farklı olabilir)"],["img/hd-bit-2.jpg","Yaprak biti bulaşmış bitki (genel örnek)"]],"Acyrthosiphon pisum":[["img/hd-bit-1.jpg","Yaprak biti kolonisi (genel örnek; tür farklı olabilir)"],["img/hd-bit-2.jpg","Yaprak biti bulaşmış bitki (genel örnek)"]],"Cavariella aegopodii":[["img/hd-bit-1.jpg","Yaprak biti kolonisi (genel örnek; tür farklı olabilir)"],["img/hd-bit-2.jpg","Yaprak biti bulaşmış bitki (genel örnek)"]],"Nasonovia ribisnigri":[["img/hd-bit-1.jpg","Yaprak biti kolonisi (genel örnek; tür farklı olabilir)"],["img/hd-bit-2.jpg","Yaprak biti bulaşmış bitki (genel örnek)"]],"Aphis fabae":[["img/hd-bit-1.jpg","Yaprak biti kolonisi (genel örnek; tür farklı olabilir)"],["img/hd-bit-2.jpg","Yaprak biti bulaşmış bitki (genel örnek)"]],"Trialeurodes vaporariorum":[["img/hd-beyazsinek-1.jpg","Yaprakta beyaz sinek erginleri (genel örnek)"],["img/hd-beyazsinek-2.jpg","Yaprak altında beyaz sinek bulaşığı (genel örnek)"]],"Phyllotreta cruciferae":[["img/hd-pire-1.jpg","Pire böceği, yaprak üzerinde (genel örnek)"],["img/hd-pire-2.jpg","Pire böceği (genel örnek)"]],"Kalsiyum eksikliği (fizyolojik)":[["img/hd-ucurume-1.jpg","Yeşil domateslerde uç çürüklüğü: ucunda koyu, çökük leke"],["img/hd-ucurume-2.jpg","Aynı bozukluk, olgun domateslerde"]]};
+
+// ---------- MODEL ----------
+const AY=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+const MS=[0,31,59,90,120,151,181,212,243,273,304,334];
+const norm=d=>((Math.round(d)-1)%365+365)%365+1;
+function fmt(d){const n=norm(d);let m=11;while(MS[m]>=n)m--;return (n-MS[m])+' '+AY[m]}
+const T=(p,d)=>p.Tm+p.A*Math.cos(2*Math.PI*(norm(d)-203)/365);
+function frost(p){let lc=0;for(let d=1;d<=200;d++)if(T(p,d)<8)lc=d;
+  let fc=null;for(let d=200;d<=365;d++)if(T(p,d)<9){fc=d;break}
+  return{last:lc?lc+10:0,first:fc?fc-10:null}}
+const cyc=c=>c.st.reduce((x,y)=>x+y,0);
+function okArr(p,c,o){o=o||{};const fr=frost(p),a=new Array(366).fill(false),cy=cyc(c),b=o.bonus||0;
+  for(let d=1;d<=365;d++){const t=T(p,d);let ok;
+    if(c.tip==='sicak'){ok=(t+b)>=c.t0&&t<=c.t1;
+      if(ok&&d<=200&&fr.last&&d<fr.last+7+(o.shift||0))ok=false;
+      if(ok&&fr.first&&d+cy>fr.first+7)ok=false;
+      if(ok&&(T(p,d+Math.round(cy*.6))+b)<c.t0-4)ok=false;
+    }else ok=t>=c.t0&&t<=c.t1&&T(p,d+25)>=c.t0-3;
+    a[d]=ok}
+  return a}
+function ranges(a){const r=[];let s=null;
+  for(let d=1;d<=365;d++){if(a[d]&&s===null)s=d;
+    if((!a[d]||d===365)&&s!==null){r.push({s,e:a[d]?d:d-1});s=null}}
+  if(r.length>1&&r[0].s===1&&r[r.length-1].e===365){const l=r.pop();r[0]={s:l.s,e:r[0].e+365}}
+  return r}
+const len=w=>w.e-w.s+1;
+const inWin=(w,d)=>{const n=norm(d);return w.e>365?(n>=w.s||n<=w.e-365):(n>=w.s&&n<=w.e)};
+const ET0=(p,t)=>Math.max(.4,.17*t)*(1+(p.yagis<450?.25:p.yagis>1000?-.1:0));
+function recOf(w){return w.s+(len(w)>=20?Math.min(10,Math.floor(len(w)/4)):0)}
+function statusOf(a,today){
+  if(a[today])return{k:'ok',t:'Şimdi uygun'};
+  for(let k=1;k<=365;k++){const d=norm(today+k);if(a[d])return{k:'wait',t:'Sonraki: '+fmt(d),d}}
+  return{k:'no',t:'Açıkta uygun dönem yok'}}
+//--UI--
+// ---------- UI ----------
+const $=id=>document.getElementById(id);
+const now=new Date();
+const TODAY=Math.min(365,Math.floor((now-new Date(now.getFullYear(),0,0))/86400000));
+const state={il:Math.max(0,PROV.findIndex(p=>p.ad==='Ankara')),crop:0};
+try{const s=JSON.parse(localStorage.getItem('tarla')||'null');
+  if(s){const i=PROV.findIndex(p=>p.ad===s.il);if(i>=0)state.il=i;const j=CROPS.findIndex(c=>c.id===s.crop);if(j>=0)state.crop=j}}catch(e){}
+const save=()=>{try{localStorage.setItem('tarla',JSON.stringify({il:PROV[state.il].ad,crop:CROPS[state.crop].id}))}catch(e){}};
+const inat=n=>'https://www.inaturalist.org/observations?quality_grade=research&photos=true&taxon_name='+encodeURIComponent(n);
+// iNaturalist Bitki Fenolojisi filtreleri: term 12; 13 çiçekli, 14 meyveli, 21 çiçeksiz (yalnız yapraklı)
+function inatStage(c,i){
+  const b='https://www.inaturalist.org/observations?quality_grade=research&photos=true&taxon_name='+encodeURIComponent(c.lat);
+  const ph=v=>b+'&term_id=12&term_value_id='+v;
+  const seed=[b+'&q=seedling','filiz'],veg=[ph(21),'yapraklı bitki'],flo=[ph(13),'çiçekli bitki'],fru=[ph(14),'meyveli / baklalı bitki'];
+  const map=c.grup==='yaprak'?[seed,veg,veg,[ph(13),'çiçek sapına kalkmış bitki'],veg]:[seed,veg,flo,fru,fru];
+  return map[i]}
+const isTx=s=>/^[A-Z][a-z]+ [a-z]+$/.test(s);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const alink=(u,t)=>'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+t+'</a>';
+function thumb(c){const p=PH[c.id];
+  if(p&&p.th)return '<img src="'+p.th+'" alt="" width="34" height="34" loading="lazy">';
+  for(let i=4;i>=0;i--){const u=upShot(c,i);if(u)return '<img src="'+esc(u.src)+'" alt="" width="34" height="34" loading="lazy">'}
+  return plantSvg(4,c)}
+function stageShot(c,i){const p=PH[c.id];return (p&&p.s&&p.s[i])||null}
+function stageVis(c,i){const u=upShot(c,i),s=stageShot(c,i);
+  if(u)return '<img class="ph" src="'+esc(u.src)+'" alt="Kendi fotoğrafınız: '+esc(STG[c.grup][i])+'" width="84" height="84" loading="lazy">';
+  return s?'<img class="ph" src="'+s[0]+'" alt="'+esc(s[1])+'" width="84" height="84" loading="lazy">':plantSvg(i,c)}
+function stageCap(c,i){const u=upShot(c,i),s=stageShot(c,i);
+  if(u)return '<div class="cap">'+(u.local?'Sizin fotoğrafınız (bu cihazda saklı)':'Sizin yüklediğiniz fotoğraf')+(u.n?': '+esc(u.n):'')+'</div>';
+  return '<div class="cap">'+(s?'Gerçek fotoğraf: '+s[1]:(i===0?'Çizim. Bu kültürün filiz fotoğrafı sayfada yok; yukarıdaki "Filiz nasıl tanınır?" kutusu yazıyla anlatır. Kendi fotoğrafınızı da ekleyebilirsiniz.':'Çizim. Gerçek fotoğraf için kartın altındaki bağlantılara bakın ya da kendi fotoğrafınızı ekleyin.'))+'</div>'}
+function crOne(f){const r=CR[f];if(!r)return '';
+  return esc(r[0])+' · '+esc(r[1])+(r[2]?' · '+alink(r[2],esc(r[3]||'kaynak')):'')}
+function credits(it){
+  return '<details class="cred"><summary>Fotoğraf kaynakları ve lisanslar ('+it.length+')</summary><ul>'+it.map(x=>'<li><b>'+x[1]+':</b> '+crOne(x[0])+'</li>').join('')+'</ul><p>Fotoğraflar kırpılmış ve küçültülmüştür; her biri kendi lisansıyla kullanılır.</p></details>'}
+function gallery(c){const p=PH[c.id];
+  const lk=alink(inatStage(c,0)[0],'filiz fotoğrafları')+' ve '+alink(inat(c.lat),'bitki fotoğrafları')+' (iNaturalist)';
+  if(!p){const mine=[0,1,2,3,4].filter(i=>upShot(c,i)).length;
+    return '<p class="note" style="margin-top:10px">'+(mine?'Bu kültür için sayfada hazır fotoğraf yok; aşama kartlarında sizin yüklediğiniz fotoğraflar gösteriliyor, kalan aşamalar çizimdir.':'Bu kültür için sayfada gömülü gerçek fotoğraf yok, çizim kullanıldı.')+' Filizi ve bitkiyi tanımak için aşağıdaki "Filiz nasıl tanınır?" kutusuna ve '+lk+' bağlantılarına bakın.</p>'}
+  const seen={},it=(p.g||[].concat(p.s||[],p.x||[])).filter(x=>x&&!seen[x[0]]&&(seen[x[0]]=1));
+  return '<div class="gal">'+it.map(x=>'<figure><img src="'+x[0]+'" alt="'+esc(x[1])+'" width="112" height="112" loading="lazy"><figcaption>'+x[1]+'</figcaption></figure>').join('')+'</div>'
+    +(p.note?'<p class="note" style="margin-top:8px">'+p.note+'</p>':'')
+    +((p.s&&p.s[0])?'':'<p class="note" style="margin-top:8px">Çimlenme ve filiz aşamasını '+lk+' bağlantılarından görebilirsiniz; yazıyla tarifi "Gelişme aşamaları" bölümündeki "Filiz nasıl tanınır?" kutusunda bulursunuz.</p>')
+    +credits(it)}
+function dgal(x){const d=DPH[x[1]];if(!d)return '';
+  const cr=d.map(s=>crOne(s[0])).filter((v,i,a)=>v&&a.indexOf(v)===i);
+  return '<div class="gal">'+d.map(s=>'<figure><img src="'+s[0]+'" alt="'+esc(x[0])+' belirtisi: '+esc(s[1])+'" width="112" height="112" loading="lazy"><figcaption>'+s[1]+'</figcaption></figure>').join('')+'</div>'
+    +'<p class="credit">Fotoğraf: '+cr.join('; ')+'</p>'}
+const r1=x=>(Math.round(x*10)/10).toString().replace('.',',');
+
+// ---------- Filiz tanıma rehberi ----------
+// s: grup · g: çıkış süresi · c: çenek yaprağı · i: ilk gerçek yaprak · k: karışmasın / ipucu · q: tablo için kısa ayırt edici
+const SG=[
+ ['dar','Dar, şerit gibi çenek yaprakları'],
+ ['iri','Kalın, oval çenek yaprakları (kabakgiller)'],
+ ['orta','Oval, orta boy çenek yaprakları'],
+ ['cent','Ucu çentikli ya da üç parçalı çenek yaprakları (turpgiller)'],
+ ['sulu','Çok küçük, etli ve sulu çenek yaprakları'],
+ ['bak','Baklagiller: tohum yaprakları toprakta mı kalıyor, üstüne mi çıkıyor?'],
+ ['yok','Tohumla değil, sürgün ya da fideyle başlayanlar']];
+const SD={
+ domates:{s:'dar',g:'5-10 gün',
+  c:'İki uzun, dar, şerit gibi çenek yaprağı; kenarı düz, rengi açık yeşildir. Sap (hipokotil) bazen mor tonludur.',
+  i:'İlk gerçek yaprak tırtıklı-parçalı ve tüylüdür; yaprağa dokununca kendine özgü domates kokusu gelir.',
+  k:'Biberin çeneği daha geniş ve parlaktır, ilk yaprağı tüysüz ve bütün kenarlıdır. Patlıcanın ilk yaprağı yuvarlakça, gri-yeşil ve yoğun tüylüdür.',
+  q:'dar çenek; tırtıklı, tüylü, kokulu ilk yaprak'},
+ biber:{s:'orta',g:'8-12 gün (soğuk toprakta 3 haftaya kadar)',
+  c:'İki yumurta-mızrak biçimli, düz ve hafif parlak çenek yaprağı; domatesinkinden kısa ve geniştir.',
+  i:'İlk gerçek yaprak bütün kenarlı (tırtıksız), sivri uçlu, tüysüz ve pürüzsüzdür; domates gibi belirgin koku vermez.',
+  k:'Domates fidesi tırtıklı, tüylü ve kokuludur; biberde bunların hiçbiri yoktur.',
+  q:'bütün kenarlı, tüysüz, parlak ilk yaprak'},
+ patlican:{s:'orta',g:'7-12 gün',
+  c:'İki oval-uzun, kalın ve mat çenek yaprağı; domateskinden kısa ve geniştir, sap bazen mor tonludur.',
+  i:'İlk gerçek yaprak yuvarlakça, kenarı hafif dalgalı, gri-yeşil ve ince tüylüdür (kadifemsi); damarlar morumsu olabilir.',
+  k:'Biberin yaprağı tüysüz ve parlak, domatesinki tırtıklı ve kokuludur; patlıcan yumuşak ve gri görünür.',
+  q:'gri-yeşil, kadifemsi tüylü ilk yaprak'},
+ salatalik:{s:'iri',g:'3-7 gün',
+  c:'İki büyük (3-5 cm), kalın, oval ve düz çenek yaprağı; kısa, kalın, açık yeşil sap.',
+  i:'İlk gerçek yaprak kaba (zımpara gibi) tüylü, kalp biçimli ve köşeli 3-5 loblu; sonradan asma bıyığı çıkar.',
+  k:'Kabaktan daha küçük ve ince yapılıdır. Kavunun ilk yaprağı yuvarlak ve yumuşaktır, salatalığınki köşeli ve kabadır.',
+  q:'kaba, köşeli 3-5 loblu yaprak; asma bıyığı'},
+ kabak:{s:'iri',g:'4-7 gün',
+  c:'İki iri (4-6 cm), çok kalın, oval çenek yaprağı; kalın, soluk yeşil sap.',
+  i:'İlk gerçek yaprak iri, sert dikenimsi tüylü ve 3-5 loblu; bazı çeşitlerde gümüşi-beyaz benekli.',
+  k:'Salatalıktan çeneği daha iri ve kalın, yaprağı daha büyük ve serttir. Balkabağıyla çok benzer; fark ilerleyen yapraklarda belirir.',
+  q:'çok iri, sert tüylü, loblu yaprak; bazen gümüşi benek'},
+ balkabagi:{s:'iri',g:'5-8 gün',
+  c:'İki çok iri ve kalın, oval çenek yaprağı.',
+  i:'İlk gerçek yaprak yuvarlakça-böbrek biçimli, hafif loblu ve yumuşak tüylüdür.',
+  k:'Sakız kabağının yaprağı daha kaba ve daha derin loblu, balkabağınki daha yuvarlak ve yumuşaktır.',
+  q:'yuvarlakça, yumuşak tüylü, az loblu yaprak'},
+ kavun:{s:'iri',g:'4-8 gün',
+  c:'İki küçük-orta boy, oval ve yumuşak çenek yaprağı; salatalığınkinden küçüktür.',
+  i:'İlk gerçek yaprak yuvarlak-böbrek biçimli, köşesiz ya da çok hafif loblu ve yumuşak tüylüdür.',
+  k:'Salatalığın yaprağı köşeli ve kaba, karpuzunki derin parçalıdır; kavunun yuvarlak ve yumuşaktır.',
+  q:'yuvarlak-böbrek biçimli, yumuşak yaprak'},
+ karpuz:{s:'iri',g:'4-8 gün (soğuk toprakta çıkmaz)',
+  c:'İki küçük-orta boy, oval, ucu hafif sivri çenek yaprağı.',
+  i:'İlk gerçek yapraklar loblu, sonrakiler derin parçalıdır (meşe yaprağı gibi) ve mavimsi yeşil görünür.',
+  k:'Kavun ve salatalık yaprakları yuvarlak-köşelidir; karpuzunki parmaklı-parçalıdır, en kolay bununla ayrılır.',
+  q:'derin parçalı (meşe yaprağı gibi), mavimsi yaprak'},
+ fasulye:{s:'bak',g:'5-8 gün',
+  c:'Önce kancalı bir sap toprağı yırtar; ardından iki kalın, böbrek biçimli, etli tohum yaprağı toprak üstüne çıkar.',
+  i:'İlk gerçek yapraklar karşılıklı bir çift, tek parçalı, kalp biçimli ve düzdür; üç yapraklı yapraklar sonradan gelir.',
+  k:'Bezelyede tohum yaprakları toprak altında kalır, fasulyede toprak üstüne çıkar. Fasulye dona çok duyarlıdır.',
+  q:'iri, etli tohum yaprakları toprak üstüne çıkar'},
+ bezelye:{s:'bak',g:'7-10 gün (soğuk toprakta 3 haftaya kadar)',
+  c:'Çenek yaprakları toprakta kalır; yüzeye kıvrık, kancalı bir sürgün ve küçük pul yapraklar çıkar.',
+  i:'Yapraklar mavimsi yeşil ve mumsudur; çiftli yaprakçıklar ve büyük kulakçıklar görünür, çok geçmeden asma bıyığı oluşur.',
+  k:'Fasulyenin iri tohum yaprakları toprak üstüne çıkar, bezelyeninkiler çıkmaz. Bezelye hafif dona dayanır, fasulye dayanmaz.',
+  q:'tohum yaprakları toprakta kalır; kancalı sürgün, mumsu yaprak'},
+ cilek:{s:'yok',g:'Tohumla değil, fideyle dikilir; yeni yaprak yaklaşık 2 hafta içinde çıkar',
+  c:'Çilek genellikle tohumla ekilmez; tohumdan çıkış 2-4 hafta sürer ve fideler çok küçük kalır.',
+  i:'Her yaprak üç parçalı (üç yaprakçıklı) ve kenarı tırtıklıdır; fide, kökten çıkan bir yaprak rozetidir ve ortasında tepe tomurcuğu (kalp) bulunur.',
+  k:'Yeni dikilen fide birkaç gün solgun durabilir; kalp yeşil ve sağlamsa tutunuyor demektir. Kalbi toprağa gömmeyin.',
+  q:'üç parçalı, tırtıklı yaprak rozeti (fideyle)'},
+ marul:{s:'orta',g:'2-7 gün (22 °C üstünde çimlenme düşer)',
+  c:'İki küçük, oval-kaşık biçimli, düz ve açık yeşil çenek yaprağı; sap ince ve açık renkli.',
+  i:'İlk gerçek yapraklar kaşık biçimli, kenarı hafif dişli-dalgalı ve tüysüzdür; rozet halinde dizilir.',
+  k:'Ispanağın çeneği şerit gibi dar, marulunki kaşık gibi geniştir. Roka ve tereninki ucu çentikli ya da üç parçalıdır; marulunki çentiksizdir.',
+  q:'kaşık biçimli, hafif dişli, tüysüz yaprak'},
+ ispanak:{s:'dar',g:'5-8 gün (soğukta 2 haftaya kadar; sıcakta çıkmaz)',
+  c:'İki dar, uzun, kalınca ve düz çenek yaprağı (şerit biçimli).',
+  i:'İlk gerçek yapraklar yumurta-ok biçimli, düz ya da hafif kabarık, koyu yeşil ve parlaktır.',
+  k:'Pazı ve pancarın çeneği daha geniştir, sapı renkli çeşitlerde pembe-kırmızımsıdır; ıspanak dar ve yeşildir.',
+  q:'dar çenek; oval-ok biçimli, koyu yeşil yaprak'},
+ pazi:{s:'orta',g:'5-10 gün',
+  c:'İki uzunca-oval, kalın çenek yaprağı; renkli çeşitlerde sap ve damar pembe-kırmızımsıdır.',
+  i:'İlk gerçek yapraklar parlak, hafif dalgalı, belirgin saplı ve damarlıdır; renkli saplı çeşitlerde renk erken görünür.',
+  k:'Tohum bir kümedir (çok tohumlu), aynı noktadan 2-3 filiz birlikte çıkar; seyreltin. Kırmızı pancar ve şeker pancarı aynı türdendir, filizleri neredeyse ayırt edilemez.',
+  q:'parlak, dalgalı yaprak; bir noktadan 2-3 filiz'},
+ roka:{s:'cent',g:'3-5 gün (serin havada 7 güne kadar)',
+  c:'Çok küçük (5-10 mm), uzun saplı, ucu çentikli (kalp-böbrek biçimli) iki çenek yaprağı.',
+  i:'İlk gerçek yapraklar yuvarlakça ve kenarı hafif loblu; sonrakiler ucu büyük, yanları küçük loblu olur. Ezince fındıksı-acımsı roka kokusu gelir.',
+  k:'Terenin çeneği üç parçalıdır (yonca gibi), rokanınki ucu çentikli iki loblu. İkisi de turpgildir ve baharatlı kokar.',
+  q:'ucu çentikli çenek; fındıksı-acı koku; 3-5 günde çıkar'},
+ tere:{s:'cent',g:'1-3 gün (en geç 4 gün)',
+  c:'Üç parçalı (yonca yaprağına benzeyen) iki çenek yaprağı; sap ince, beyazımsı ve çok hızlı uzar.',
+  i:'İlk gerçek yapraklar ince saplı, parçalı-loblu ve narindir; ezince keskin turp-hardal kokusu gelir.',
+  k:'Su teresi (Nasturtium) başka bir bitkidir ve su kenarında yetişir. Roka çeneği çentikli iki loblu, tere üç parçalıdır.',
+  q:'üç parçalı (yonca gibi) çenek; 1-3 günde çıkar'},
+ dereotu:{s:'dar',g:'7-10 gün (soğukta 2 haftaya kadar)',
+  c:'İki dar, uzun, ince çenek yaprağı (çimen gibi).',
+  i:'İlk gerçek yapraklar baştan iplik gibi ince ve tüycüklü bölünmüştür; ezince anasonumsu dereotu kokusu gelir.',
+  k:'Maydanoz ve kişnişin çenekleri de dardır; gerçek yaprak çıkınca ayrılır: dereotu ipliksi, maydanoz parlak-dişli üçlü, kişniş yuvarlak-loblu ve mat.',
+  q:'ipliksi, tüycüklü yaprak; anasonumsu koku'},
+ maydanoz:{s:'dar',g:'14-21 gün (28 güne kadar uzayabilir)',
+  c:'İki dar, uzun, ince çenek yaprağı; fideler çok küçük ve yavaş büyür.',
+  i:'İlk gerçek yapraklar parlak, üç parçalı ve dişlidir (kıvırcık çeşitte kıvrık); ezince maydanoz kokusu gelir.',
+  k:'Kişnişin ilk yaprakları mat ve yuvarlak loblu, dereotununki ipliksidir. Ektiğiniz sırada olmayan, tanımadığınız maydanoz benzeri filizleri yemeyin (zehirli baldıran benzeyebilir).',
+  q:'parlak, üç parçalı, dişli yaprak; çok yavaş çıkar'},
+ kisnis:{s:'dar',g:'7-12 gün (serin havada 3 haftaya kadar)',
+  c:'İki dar, uzun çenek yaprağı; maydanoz ve dereotununkine çok benzer.',
+  i:'İlk gerçek yapraklar yuvarlakça, kenarı dalgalı-dişli, mat ve yumuşaktır; ezince keskin kişniş kokusu gelir. Üst yapraklar sonradan ince ve ipliksi olur.',
+  k:'Maydanozun gerçek yaprağı parlak ve sivri dişlidir, kişnişinki mat ve yuvarlak loblu.',
+  q:'mat, yuvarlak loblu yaprak; keskin kişniş kokusu'},
+ nane:{s:'yok',g:'Tohumla değil, kök sürgünü veya çelikle çoğaltılır; dikimden 10-14 gün sonra yeni sürgün çıkar',
+  c:'Tohumdan çıkarsa çenekler çok küçük ve yuvarlak-ovaldır; sürgünle başlayınca çenek yaprağı olmaz.',
+  i:'Gövde dört köşelidir, yapraklar karşılıklı çiftler halinde dizilir, kenarı dişli ve hafif kırışıktır; ezince ferahlatıcı nane kokusu gelir.',
+  k:'Fesleğen de karşılıklı yapraklıdır ama yaprağı düz ve parlaktır, kokusu farklıdır.',
+  q:'kare gövde, karşılıklı dişli yaprak; nane kokusu'},
+ semizotu:{s:'sulu',g:'5-7 gün (sıcak toprak ister; ışıkla çimlenir)',
+  c:'Çok küçük (2-4 mm), etli, kaşık biçimli iki çenek yaprağı; sap çoğu zaman kırmızımsıdır.',
+  i:'İlk gerçek yapraklar küçük, etli, kaşık biçimli ve parlaktır; gövde yere yatık, kırmızımsı ve sulu olur.',
+  k:'Sütleğen (Euphorbia) benzer; gövdeyi kırınca süt gibi beyaz sızıntı çıkıyorsa semizotu değildir ve zehirlidir, yemeyin. Semizotunun özsuyu saydamdır.',
+  q:'etli, sulu, kaşık biçimli; yatık kırmızımsı gövde'},
+ feslegen:{s:'orta',g:'5-8 gün (soğuk toprakta çıkmaz)',
+  c:'İki yuvarlakça, ucu hafif çentikli, düz çenek yaprağı (yaklaşık 1 cm).',
+  i:'İlk gerçek yapraklar karşılıklı bir çift, oval-sivri ve parlaktır; ezince fesleğen kokusu gelir.',
+  k:'Nanenin yaprağı dişli-kırışık ve kokusu naneli; fesleğeninki düz ve parlaktır.',
+  q:'karşılıklı, oval-sivri, parlak yaprak; fesleğen kokusu'}};
+// Arama bağlantıları için İngilizce adlar ve aşama terimleri
+const EN={domates:'tomato',biber:'pepper',patlican:'eggplant',salatalik:'cucumber',kabak:'zucchini',balkabagi:'pumpkin',kavun:'melon',karpuz:'watermelon',cilek:'strawberry',fasulye:'bean',bezelye:'pea',marul:'lettuce',ispanak:'spinach',pazi:'chard',roka:'arugula',tere:'garden cress',maydanoz:'parsley',dereotu:'dill',kisnis:'coriander',nane:'mint',semizotu:'purslane',feslegen:'basil'};
+const QT={meyve:['seedling','young plant','flower','fruit','harvest'],yaprak:['seedling','young plant','leaves','flowering','harvest'],baklagil:['seedling','young plant','flower','pods','harvest']};
+function srcLinks(c,i){const t=QT[c.grup][i];
+  const cu='https://commons.wikimedia.org/w/index.php?title=Special%3AMediaSearch&type=image&search='+encodeURIComponent(c.lat+' '+t);
+  const un='https://unsplash.com/s/photos/'+encodeURIComponent(((EN[c.id]||c.lat)+' '+t).trim().replace(/\s+/g,'-'));
+  return alink(cu,'Wikimedia Commons')+alink(un,'Unsplash')}
+function seedBox(c){const d=SD[c.id];if(!d)return '';
+  const row=(t,x)=>x?'<div><dt>'+t+'</dt><dd>'+x+'</dd></div>':'';
+  return '<div class="seed" id="seedbox"><h3>Filiz nasıl tanınır?</h3><dl>'+row('Çıkış süresi',d.g)+row('Çenek yaprağı',d.c)+row('İlk gerçek yaprak',d.i)+row('Karışmasın',d.k)+'</dl>'
+   +'<p class="note">Çenek yaprağı tohumdan çıkan ilk iki yapraktır; gerçek yapraklar ondan sonra gelir ve bitkinin asıl biçimini taşır. Tarifler çeşide, sıcaklığa ve ışığa göre değişebilir; emin değilseniz ilk gerçek yaprağa ve kokuya bakın, sıranın başına etiket dikin.</p>'
+   +'<div class="links"><span class="note">Gerçek filiz fotoğrafları:</span>'+alink(inatStage(c,0)[0],'iNaturalist')+srcLinks(c,0)+'</div></div>'}
+function seedTable(){
+  let h='<details class="seedtab"><summary>Elimdeki filiz hangisi? Tüm kültürlerin filizleri</summary><p class="note">Çenek yaprağının biçimine bakıp aşağıdan grubunu bulun, sonra ilk gerçek yaprağa ve kokuya göre kültürü seçin. Kültür adına tıklayınca tam tarif açılır.</p>';
+  SG.forEach(g=>{const m=CROPS.map((c,i)=>[c,i]).filter(x=>SD[x[0].id]&&SD[x[0].id].s===g[0]);if(!m.length)return;
+    h+='<h3>'+g[1]+'</h3><ul>'+m.map(x=>'<li><button class="lk" data-i="'+x[1]+'">'+x[0].ad+'</button>: '+SD[x[0].id].q+'</li>').join('')+'</ul>'});
+  return h+'</details>'}
+
+// Büyütülünce kullanılan yüksek çözünürlüklü sürümler: ad -> kenar (px); dosya img/big/<ad>.jpg
+const BG={"balkabagi-asma":750,"balkabagi-bal":666,"balkabagi-cesit":750,"balkabagi-hasat":733,"balkabagi-koyu":800,"balkabagi-meyve":634,"bezelye-bakla":750,"bezelye-genc":720,"bezelye-hasat":793,"bezelye-seker":600,"bezelye-sira":720,"bezelye-tane":800,"biber-aci":750,"biber-bitki":675,"biber-cicek":750,"biber-hasat":666,"biber-saksi":800,"cilek-bitki":712,"cilek-hasat":667,"cilek-ortu":720,"cilek-tarla":640,"dereotu":600,"domates-bitki":638,"domates-cicek":900,"domates-cicek2":900,"domates-fide":900,"domates-genc":900,"domates-hasat":691,"domates-saksi":690,"domates-sera":750,"domates-tarla":900,"fasulye-bakla":750,"fasulye-destek":750,"fasulye-genc":720,"fasulye-hasat":540,"fasulye-sira":750,"fasulye-yassi":720,"feslegen-bitki":600,"feslegen-genc":640,"feslegen-hasat":640,"feslegen-surgun":750,"feslegen-yaprak":720,"hd-beyazsinek-1":711,"hd-beyazsinek-2":753,"hd-bit-1":768,"hd-bit-2":771,"hd-kulleme-v1":800,"hd-kulleme-v2":750,"hd-orumcek-v1":750,"hd-pire-1":615,"hd-pire-2":800,"hd-ucurume-1":667,"hd-ucurume-2":667,"ispanak-genc":720,"ispanak-hasat":708,"ispanak-rozet":593,"ispanak-taze":600,"ispanak-yaprak":640,"kabak-cicek":750,"kabak-cizgili":505,"kabak-genc":750,"kabak-hasat":652,"kabak-meyve":600,"kabak-yatak":750,"karpuz-dilim":750,"karpuz-genc":540,"karpuz-hasat":720,"karpuz-meyve":664,"kavun-asma":720,"kavun-hasat":720,"kavun-kesit":720,"kavun-meyve":720,"kisnis":600,"marul-bas":720,"marul-hasat":579,"marul-tarla":640,"maydanoz":600,"nane":600,"patlican-bitki":750,"patlican-cesit":800,"patlican-genc":750,"patlican-hasat":672,"patlican-meyve":800,"pazi-genc":540,"pazi-hasat":750,"pazi-kirmizi":600,"pazi-rozet":750,"pazi-yaprak":640,"salatalik-asma":720,"salatalik-boy":640,"salatalik-cicek":720,"salatalik-hasat":432,"salatalik-meyve":697,"salatalik-sera":720};
+
+// ---------- Kendi fotoğraflarım ----------
+// Ortak kayıt: dosya assets'e, bilgi db'ye ('foto/<kültür>_<aşama>' = {a, n, t}); sayfayı açan herkes görür.
+// Yerel kayıt: yetki gerekmez; fotoğraf bu tarayıcının IndexedDB'sinde ('tarla-defteri' / 'foto') saklanır, başka cihazda görünmez.
+const UP={},LOC={},BAD={},UPL={sh:false,db:null,assets:null,locOk:true};
+let PEND=null,PICK=null,DELCONF=null,UPERR=null,NOTICE=null;
+const idRx=/^[0-9a-f]{32}$/,duRx=/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/;
+const upKey=(c,i)=>c.id+'_'+i;
+// BAD: yüklenemeyen ortak dosyalar (ör. başka bir kullanıcının yüklediği ve bu görünüme açık olmayan dosya) atlanır.
+function upShotK(k){const s=UP[k],l=LOC[k];
+  const a=s&&idRx.test(s.a)&&!BAD[s.a]?{src:'/_blob/'+s.a,n:s.n||'',t:s.t||0,local:false}:null;
+  const b=l&&l.d?{src:l.d,n:l.n||'',t:l.t||0,local:true}:null;
+  return a&&b?(b.t>a.t?b:a):(a||b)}
+const upShot=(c,i)=>upShotK(upKey(c,i));
+function upMsg(e){const k=e&&e.code;
+  if(k==='too_large')return 'Fotoğraf çok büyük.';
+  if(k==='quota_or_state'||k==='quota_exceeded')return 'Sayfanın depolama alanı dolu ya da sayfa yeni dosya kabul etmiyor.';
+  if(k==='rate_limited'||k==='resource_exhausted')return 'Çok sık işlem yapıldı.';
+  if(k==='not_granted'||k==='capability_disabled'||k==='capability_removed'||k==='revoked'||k==='invalid_argument')return 'Bu görünümde ortak kayıt yetkiniz yok.';
+  return 'Ortak kayıt şu an yapılamıyor.'}
+// IndexedDB (try/catch: gizli pencerede ya da site verisi kapalıysa çalışmayabilir)
+function idbOpen(){return new Promise((ok,no)=>{
+  try{const r=indexedDB.open('tarla-defteri',1);
+    r.onupgradeneeded=()=>{r.result.createObjectStore('foto',{keyPath:'k'})};
+    r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error||new Error('idb'));r.onblocked=()=>no(new Error('blocked'))}
+  catch(e){no(e)}})}
+const idbTx=(mode,fn)=>idbOpen().then(db=>new Promise((ok,no)=>{
+  let t,rq;
+  try{t=db.transaction('foto',mode);rq=fn(t.objectStore('foto'))}catch(e){db.close();return no(e)}
+  t.oncomplete=()=>{const v=rq&&rq.result;db.close();ok(v)};
+  t.onerror=t.onabort=()=>{db.close();no(t.error||new Error('idb'))}}));
+const locAll=()=>idbTx('readonly',s=>s.getAll());
+const locPut=o=>idbTx('readwrite',s=>s.put(o));
+const locDel=k=>idbTx('readwrite',s=>s.delete(k));
+const b2u=b=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>no(r.error||new Error('read'));r.readAsDataURL(b)});
+function shrink(file){return new Promise((ok,no)=>{
+  const fr=new FileReader();
+  fr.onerror=()=>no(new Error('read'));
+  fr.onload=()=>{const im=new Image();
+    im.onerror=()=>no(new Error('decode'));
+    im.onload=()=>{try{
+      const W=im.naturalWidth,H=im.naturalHeight;if(!W||!H)throw new Error('size');
+      const r=Math.min(1,1024/Math.max(W,H)),w=Math.max(1,Math.round(W*r)),h=Math.max(1,Math.round(H*r));
+      const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+      const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,w,h);g.drawImage(im,0,0,w,h);
+      const pv=document.createElement('canvas'),q=Math.min(1,200/Math.max(w,h));
+      pv.width=Math.max(1,Math.round(w*q));pv.height=Math.max(1,Math.round(h*q));pv.getContext('2d').drawImage(cv,0,0,pv.width,pv.height);
+      const prev=pv.toDataURL('image/jpeg',.8);
+      cv.toBlob(b=>{if(!b)return no(new Error('encode'));
+        if(b.size>450000)cv.toBlob(b2=>ok({blob:b2||b,prev}),'image/jpeg',.7);else ok({blob:b,prev})},'image/jpeg',.85)
+    }catch(x){no(x)}};
+    im.src=fr.result};
+  fr.readAsDataURL(file)})}
+function upUI(c,i){
+  const k=upKey(c,i),u=upShotK(k);
+  const msg=(UPERR&&UPERR.key===k?'<p class="uperr" role="alert">'+esc(UPERR.msg)+'</p>':'')+(NOTICE&&NOTICE.key===k&&NOTICE.msg?'<p class="note" role="status">'+esc(NOTICE.msg)+'</p>':'');
+  if(PEND&&PEND.key===k){
+    if(PEND.bad)return '<div class="upf"><div class="upr"><p class="uperr" role="alert">'+esc(PEND.err)+'</p><div class="upb2"><button class="btn ghost" data-up="cancel">Tamam</button></div></div></div>';
+    if(!PEND.blob)return '<div class="upf"><p class="note">Fotoğraf hazırlanıyor…</p></div>';
+    return '<div class="upf"><img class="pv" src="'+PEND.prev+'" alt="Seçtiğiniz fotoğrafın önizlemesi" width="84" height="84"><div class="upr">'
+     +'<label>Kaynak veya yazar (isteğe bağlı)<input id="upNote" type="text" maxlength="140" value="'+esc(PEND.note)+'" placeholder="ör. kendi çektiğim; Wikimedia, Ad Soyad, CC BY-SA"></label>'
+     +'<p class="note">'+(UPL.sh?'Yüklediğiniz fotoğraf bu sayfayı açabilen herkese görünür.':'Bu fotoğraf yalnızca bu cihazda ve bu tarayıcıda saklanır; başkaları görmez.')+'</p>'
+     +'<div class="upb2"><button class="btn" data-up="save"'+(PEND.busy?' disabled':'')+'>'+(PEND.busy?'Kaydediliyor…':'Kaydet')+'</button><button class="btn ghost" data-up="cancel"'+(PEND.busy?' disabled':'')+'>Vazgeç</button></div>'
+     +(PEND.err?'<p class="uperr" role="alert">'+esc(PEND.err)+'</p>':'')+'</div></div>'}
+  const ds='data-c="'+c.id+'" data-s="'+i+'"',mine=u&&(u.local||UPL.sh);
+  return '<div class="upc"><button class="btn ghost" data-up="pick" '+ds+'>'+(mine?'Fotoğrafı değiştir':'Kendi fotoğrafımı ekle')+'</button>'
+    +(mine?(DELCONF===k?'<button class="btn" data-up="del" '+ds+'>Evet, kaldır</button><button class="btn ghost" data-up="delno" '+ds+'>Vazgeç</button>':'<button class="btn ghost" data-up="del" '+ds+'>Kaldır</button>'):'')+'</div>'+msg}
+async function onPick(e){const f=e.target.files&&e.target.files[0],key=PICK;
+  if(!f||!key)return;
+  UPERR=null;DELCONF=null;NOTICE=null;
+  if(f.size>30*1048576){PEND={key,bad:true,err:'Dosya çok büyük (30 MB üstü). Daha küçük bir fotoğraf seçin.'};render();return}
+  PEND={key,blob:null,prev:'',note:'',busy:true,err:''};render();
+  try{const r=await shrink(f);PEND={key,blob:r.blob,prev:r.prev,note:'',busy:false,err:''}}
+  catch(x){PEND={key,bad:true,err:'Bu dosya okunamadı. JPG, PNG veya WebP bir fotoğraf seçin.'}}
+  render();
+  const n=$('upNote');if(n){try{n.focus({preventScroll:true});n.scrollIntoView({block:'center',behavior:'smooth'})}catch(x){}}}
+async function savePend(){const P=PEND;if(!P||P.busy||!P.blob)return;
+  P.busy=true;P.err='';render();
+  const key=P.key,note=P.note.trim().slice(0,140);let where='',why='';
+  if(UPL.sh){
+    let up=null,saved=false;
+    try{
+      up=await UPL.assets.upload(P.blob,{type:'image/jpeg'});
+      const old=UP[key],t=Date.now();
+      await UPL.db.doc('foto/'+key).set({a:up.id,n:note,t});
+      saved=true;UP[key]={a:up.id,n:note,t};where='sh';
+      if(old&&idRx.test(old.a)&&old.a!==up.id){try{await UPL.assets.delete(old.a)}catch(x){}}
+      if(LOC[key]){delete LOC[key];locDel(key).catch(()=>{})}
+    }catch(e){
+      if(up&&!saved){try{await UPL.assets.delete(up.id)}catch(x){}}
+      if(!saved)why=upMsg(e)}
+  }
+  if(!where){
+    try{
+      const d=await b2u(P.blob),o={k:key,d,n:note,t:Date.now()};
+      if(!duRx.test(d))throw new Error('type');
+      LOC[key]={d,n:note,t:o.t};
+      let kept=true;try{await locPut(o)}catch(x){kept=false;UPL.locOk=false}
+      where=kept?'loc':'mem'
+    }catch(e){P.busy=false;P.err='Fotoğraf kaydedilemedi.';render();return}
+  }
+  PEND=null;
+  NOTICE={key,msg:where==='sh'?'':(where==='loc'?(why?'Ortak kayıt yapılamadı: '+why+' ':'')+'Fotoğraf bu cihaza kaydedildi; yalnızca bu tarayıcıda görünür.':'Bu tarayıcı kalıcı saklamaya izin vermiyor; fotoğraf yalnızca sayfa açıkken görünür.')};
+  chips();render()}
+async function delPhoto(key){const u=upShotK(key);if(!u)return;
+  if(DELCONF!==key){DELCONF=key;render();return}
+  DELCONF=null;NOTICE=null;
+  if(u.local){delete LOC[key];try{await locDel(key)}catch(e){}}
+  else{const old=UP[key];
+    try{await UPL.db.doc('foto/'+key).delete();delete UP[key];
+      if(old&&idRx.test(old.a)){try{await UPL.assets.delete(old.a)}catch(x){}}}
+    catch(e){UPERR={key,msg:'Ortak fotoğraf kaldırılamadı. '+upMsg(e)}}}
+  chips();render()}
+function upAct(b){const a=b.dataset.up,k=b.dataset.c+'_'+b.dataset.s;
+  if(a==='pick'){PICK=k;UPERR=null;DELCONF=null;NOTICE=null;const f=$('upFile');f.value='';f.click()}
+  else if(a==='save')savePend();
+  else if(a==='cancel'){if(PEND&&!PEND.busy){PEND=null;render()}}
+  else if(a==='del'){UPERR=null;delPhoto(k)}
+  else if(a==='delno'){DELCONF=null;render()}}
+function onFoto(snap){const m={};
+  snap.docs.forEach(d=>{const x=d.data();if(x&&typeof x.a==='string'&&idRx.test(x.a))m[d.id]={a:x.a,n:typeof x.n==='string'?x.n.slice(0,140):'',t:typeof x.t==='number'?x.t:0}});
+  Object.keys(UP).forEach(k=>delete UP[k]);Object.assign(UP,m);
+  chips();if(!PEND)render()}
+async function locInit(){
+  try{const all=await locAll();let n=0;
+    (all||[]).forEach(o=>{if(o&&typeof o.k==='string'&&typeof o.d==='string'&&duRx.test(o.d)){LOC[o.k]={d:o.d,n:typeof o.n==='string'?o.n.slice(0,140):'',t:typeof o.t==='number'?o.t:0};n++}});
+    if(n){chips();if(!PEND)render()}}
+  catch(e){UPL.locOk=false}}
+async function upInit(){
+  locInit();
+  try{
+    if(!window.claude||typeof window.claude.use!=='function')return;
+    const r=await Promise.all([window.claude.use('db'),window.claude.use('assets')]);
+    const db=r[0],as=r[1];if(!db)return;
+    UPL.db=db;UPL.assets=as;UPL.sh=!!as;
+    db.collection('foto').onSnapshot(onFoto,()=>{});
+    if(UPL.sh&&!PEND)render();
+  }catch(e){}}
+
+// ---------- Fotoğrafı büyütme ----------
+const LB={list:[],i:0,open:false,from:null,nw:0,nh:0,tok:0};
+const bigOf=s=>{const m=/^img\/([a-z0-9-]+)\.jpg$/.exec(s||'');return m&&BG[m[1]]?{url:'img/big/'+m[1]+'.jpg',px:BG[m[1]]}:null};
+function zoomify(){document.querySelectorAll('#out .stage img.ph,#out .gal img').forEach(i=>{i.dataset.z='1';i.tabIndex=0;i.setAttribute('role','button');i.title='Büyütmek için tıklayın';i.setAttribute('aria-label','Büyüt: '+(i.alt||'fotoğraf'))})}
+function lbInfo(im){
+  const src=im.getAttribute('src'),f=im.closest('figure'),st=im.closest('.stage'),ds=im.closest('.disease'),cn=CROPS[state.crop].ad;
+  let cap=im.alt||'';
+  if(f){const fc=f.querySelector('figcaption');if(fc)cap=fc.textContent;
+    if(ds){const h=ds.querySelector('h3');cap=(h&&h.firstChild?h.firstChild.textContent.trim()+': ':'')+cap}
+    else cap=cn+' · '+cap}
+  else if(st){const h=st.querySelector('h3'),c=st.querySelector('.cap');cap=cn+' · '+(h?h.textContent:'')+(c?' · '+c.textContent:'')}
+  return {src,big:bigOf(src),alt:im.alt||'',cap,cr:CR[src]?'Fotoğraf: '+crOne(src):''}}
+function lbOpen(im){
+  const seen=Object.create(null),list=[];
+  document.querySelectorAll('#out img[data-z]').forEach(x=>{const s=x.getAttribute('src');if(!s||seen[s]!==undefined)return;seen[s]=list.length;list.push(lbInfo(x))});
+  const k=seen[im.getAttribute('src')];if(k===undefined)return;
+  list[k]=lbInfo(im);
+  LB.list=list;LB.from=im;LB.open=true;
+  $('lb').hidden=false;document.documentElement.style.overflow='hidden';
+  lbShow(k);try{$('lbX').focus({preventScroll:true})}catch(e){}}
+function lbFit(){const im=$('lbImg'),it=LB.list[LB.i];if(!LB.nw||!it)return;
+  const mw=Math.min(innerWidth-24,860),mh=Math.max(120,innerHeight-(innerWidth<=600?250:200));
+  const best=it.big?it.big.px:LB.nw;
+  let w=Math.min(mw,best*(it.big?1.7:2)),h=w*LB.nh/LB.nw;
+  if(h>mh){h=mh;w=h*LB.nw/LB.nh}
+  im.style.width=Math.round(w)+'px';im.style.height='auto'}
+function lbShow(i){const it=LB.list[i];if(!it)return;
+  LB.i=i;LB.nw=0;const tok=++LB.tok,im=$('lbImg');
+  im.style.width='';im.style.height='';im.alt=it.alt;
+  $('lbCap').textContent=it.cap;$('lbCr').innerHTML=it.cr;
+  $('lbCount').textContent=LB.list.length>1?(i+1)+' / '+LB.list.length:'';
+  $('lbPrev').hidden=$('lbNext').hidden=LB.list.length<2;
+  im.onload=()=>{if(tok!==LB.tok)return;LB.nw=im.naturalWidth;LB.nh=im.naturalHeight;lbFit()};
+  im.src=it.src;
+  if(it.big){const b=new Image();
+    b.onload=()=>{if(tok!==LB.tok)return;
+      if(!LB.nw){LB.nw=b.naturalWidth;LB.nh=b.naturalHeight;lbFit()}
+      im.onload=null;im.src=it.big.url};
+    b.src=it.big.url}}
+function lbStep(d){if(LB.list.length>1)lbShow((LB.i+d+LB.list.length)%LB.list.length)}
+function lbClose(){if(!LB.open)return;
+  LB.open=false;LB.tok++;$('lb').hidden=true;$('lbImg').removeAttribute('src');
+  document.documentElement.style.overflow='';
+  const f=LB.from;if(f&&f.isConnected){try{f.focus({preventScroll:true})}catch(e){}}}
+
+function plantSvg(stage,c){
+  const col=c.renk,g=c.grup;let s='<svg viewBox="0 0 80 90" role="img" aria-label="'+STG[g][stage]+'">';
+  s+='<ellipse cx="40" cy="80" rx="30" ry="5" fill="var(--soil)" opacity=".55"/>';
+  const leaf=(x,y,rot,rx)=>'<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+(rx*.42)+'" transform="rotate('+rot+' '+x+' '+y+')" fill="var(--leaf)"/>';
+  if(g==='yaprak'){
+    const n=[2,5,7,9,9][stage],sz=[5,9,12,15,16][stage];
+    for(let i=0;i<n;i++){const ang=-75+150*i/Math.max(1,n-1);const rad=ang*Math.PI/180;
+      const x=40+Math.sin(rad)*sz*.9,y=78-Math.cos(rad)*sz*1.1;s+=leaf(x.toFixed(1),y.toFixed(1),ang-90,sz*.8)}
+    s+='<circle cx="40" cy="76" r="'+(2+stage)+'" fill="var(--stem)"/>';
+  }else{
+    const h=[8,30,44,52,54][stage];
+    s+='<line x1="40" y1="78" x2="40" y2="'+(78-h)+'" stroke="var(--stem)" stroke-width="2.5" stroke-linecap="round"/>';
+    if(stage===0){s+=leaf(33,72,-30,8)+leaf(47,72,30,8)}
+    else{const n=[0,3,4,4,3][stage];
+      for(let i=0;i<n;i++){const y=78-h*(i+1)/(n+1);s+=leaf(30,y.toFixed(1),-28,11)+leaf(50,y.toFixed(1),28,11)}
+      if(stage===1||stage>=2)s+=leaf(40,78-h-2,-90,7)}
+    if(stage===2){[[33,40],[48,34],[40,26]].forEach(a=>s+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="3.2" fill="#E8B923"/>')}
+    if(stage>=3){const op=stage===3?.5:1;
+      if(g==='baklagil'){[[30,52],[50,46],[31,38]].forEach(a=>s+='<rect x="'+(a[0]-2.5)+'" y="'+a[1]+'" width="5" height="'+(stage===3?10:14)+'" rx="2.5" fill="'+col+'" opacity="'+op+'"/>')}
+      else{const r=stage===3?4.5:6;[[30,54],[50,48],[32,40]].forEach(a=>s+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="'+r+'" fill="'+col+'" opacity="'+op+'"/>')}}
+  }
+  return s+'</svg>'}
+
+function chart(p,c,fr,wins,tw,tod){
+  const W=440,H=262,L=34,R=10,Tp=16,B=26,PW=W-L-R,PH=H-Tp-B;
+  const lo=Math.floor((p.Tm-p.A-2)/5)*5,hi=Math.ceil((p.Tm+p.A+2)/5)*5;
+  const x=d=>L+PW*(d-1)/364,y=t=>Tp+PH*(1-(t-lo)/(hi-lo));
+  let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+p.ad+' yıllık sıcaklık eğrisi ve '+c.ad+' ekim penceresi">';
+  for(let t=lo;t<=hi;t+=5)s+='<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(t).toFixed(1)+'" y2="'+y(t).toFixed(1)+'"/><text class="ax" x="'+(L-5)+'" y="'+(y(t)+3.5).toFixed(1)+'" text-anchor="end">'+t+'°</text>';
+  const band=(s0,e0,fill,op)=>{const seg=(a,b)=>'<rect x="'+x(a).toFixed(1)+'" y="'+Tp+'" width="'+Math.max(1.5,x(b)-x(a)).toFixed(1)+'" height="'+PH+'" fill="'+fill+'" opacity="'+op+'"/>';
+    return e0>365?seg(s0,365)+seg(1,e0-365):seg(s0,e0)};
+  if(fr.last)s+=band(1,fr.last,'var(--frost)',.16);
+  if(fr.first)s+=band(fr.first,365,'var(--frost)',.16);
+  wins.forEach(w=>s+=band(w.s,w.e,'var(--accent)',.28));
+  MS.forEach((m,i)=>{s+='<text class="ax" x="'+x(m+15).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+AY[i]+'</text>'});
+  let d0='';for(let d=1;d<=365;d+=3)d0+=(d===1?'M':'L')+x(d).toFixed(1)+' '+y(T(p,d)).toFixed(1);
+  s+='<path d="'+d0+'" fill="none" stroke="var(--fg)" stroke-width="2" stroke-linejoin="round"/>';
+  const th=(t,lab,left)=>'<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(t).toFixed(1)+'" y2="'+y(t).toFixed(1)+'" stroke="var(--sun)" stroke-width="1.4" stroke-dasharray="5 4"/><text class="ax" x="'+(left?L+4:W-R-4)+'" y="'+(y(t)-4).toFixed(1)+'" text-anchor="'+(left?'start':'end')+'" style="fill:var(--sun)">'+lab+'</text>';
+  if(t0inRange(c.t0,lo,hi))s+=th(c.t0,'eşik '+c.t0+'°',true);
+  if(c.tip==='serin'&&t0inRange(c.t1,lo,hi))s+=th(c.t1,'üst sınır '+c.t1+'°',false);
+  tw.forEach(w=>{const seg=(a,b)=>'<rect x="'+x(a).toFixed(1)+'" y="'+(Tp+2)+'" width="'+Math.max(2,x(b)-x(a)).toFixed(1)+'" height="6" rx="2" fill="var(--sun)"/>';s+=w.e>365?seg(w.s,365)+seg(1,w.e-365):seg(w.s,w.e)});
+  const tx=x(tod).toFixed(1);
+  s+='<line x1="'+tx+'" x2="'+tx+'" y1="'+Tp+'" y2="'+(Tp+PH)+'" stroke="var(--warn)" stroke-width="1.6" stroke-dasharray="3 3"/><text class="ax" x="'+(tod>300?tx-4:+tx+4)+'" y="'+(Tp+PH-6)+'" text-anchor="'+(tod>300?'end':'start')+'" style="fill:var(--warn)">bugün</text>';
+  return s+'</svg>'}
+const t0inRange=(t,lo,hi)=>t>lo&&t<hi;
+
+function planStart(a,wins,today){
+  let k=-1;for(let i=0;i<=365;i++){if(a[norm(today+i)]){k=i;break}}
+  if(k<0||!wins.length)return null;
+  const ps=today+k,w=wins.find(w=>inWin(w,ps));if(!w)return{abs:ps,w:null,now:k===0};
+  const dd=(norm(recOf(w))-norm(ps)+365)%365;
+  return{abs:(dd>0&&dd<len(w))?ps+dd:ps,w,now:k===0&&!(dd>0&&dd<len(w))}}
+
+function render(){
+  const p=PROV[state.il],c=CROPS[state.crop],fr=frost(p),cy=cyc(c);
+  const a=okArr(p,c),wins=ranges(a);
+  const ta=c.tip==='sicak'?okArr(p,c,{bonus:3,shift:-14}):a,tw0=c.tip==='sicak'?ranges(ta):[];
+  const tw=tw0.filter(w=>!wins.some(o=>inWin(o,w.s)&&inWin(o,w.e)));
+  const planWins=wins.length?wins:tw,planA=wins.length?a:ta,tunnelPlan=!wins.length&&tw.length>0;
+  const ps=planStart(planA,planWins,TODAY);
+  const tNow=T(p,TODAY),st=statusOf(a,TODAY),aT=$('airT').value,sT=$('soilT').value;
+  const coldest=p.Tm-p.A,hottest=p.Tm+p.A;
+  let h='';
+
+  // 1) il sayfası
+  h+='<section><p class="eyebrow">'+p.bolge+' Bölgesi</p><h2>'+p.ad+' iklim sayfası</h2><p>'+REG_NOT[p.bolge]+'</p>'
+   +'<dl class="facts"><div><dt>Rakım</dt><dd>~'+p.rakim+' m</dd></div><div><dt>Yıllık yağış</dt><dd>~'+p.yagis+' mm</dd></div><div><dt>Yıllık ort.</dt><dd>'+r1(p.Tm)+' °C</dd></div><div><dt>En soğuk ay</dt><dd>'+r1(coldest)+' °C</dd></div><div><dt>En sıcak ay</dt><dd>'+r1(hottest)+' °C</dd></div><div><dt>Son bahar donu</dt><dd>'+(fr.last?fmt(fr.last):'don yok')+'</dd></div><div><dt>İlk sonbahar donu</dt><dd>'+(fr.first?fmt(fr.first):'don yok')+'</dd></div></dl>';
+  h+='<div class="today"><div><b>Bugün, '+fmt(TODAY)+':</b> iklim normaline göre günlük ortalama yaklaşık <b>'+r1(tNow)+' °C</b>.'
+   +(aT!==''?' Sizin ölçümünüz '+r1(+aT)+' °C, normalden '+(+aT-tNow>=0?'+':'')+r1(+aT-tNow)+' °C farklı.':'')+'</div>';
+  if(sT!==''){const v=+sT;h+='<div>Toprak '+r1(v)+' °C: '+c.ad+' için en az <b>'+c.soil+' °C</b> gerekir. '+(v>=c.soil?'Toprak sıcaklığı yeterli.':'Henüz düşük, ekimi/dikimi bekletin.')+'</div>'}
+  if(aT!==''&&c.tip==='sicak'&&+aT<6)h+='<div>Hava 6 °C altında: sıcak sever kültürlerde don riski var, açıkta bırakmayın.</div>';
+  if(aT!==''&&+aT>34)h+='<div>Hava 34 °C üstünde: sulamayı sabaha çekin, taze fideyi gölgeleyin.</div>';
+  h+='</div></section>';
+
+  // 2) kültür + pencere
+  h+='<section><div class="cropHead"><h2>'+c.ad+' <span class="note" style="font-weight:400;font-size:15px">'+c.lat+'</span></h2><span class="pill '+st.k+'">'+st.t+'</span></div>'
+   +'<p class="note">'+c.yontem+' · gün ortalaması '+c.t0+(c.tip==='serin'?'-'+c.t1:'')+' °C'+(c.tip==='sicak'?' üzeri':' bandı')+' · toprak en az '+c.soil+' °C · dikimden hasat sonuna ~'+cy+' gün</p>';
+  h+=gallery(c)+'<div class="wins">';
+  if(!wins.length)h+='<div class="win" style="border-left-color:var(--warn)"><span class="k">Açıkta</span><span class="v">Uygun pencere yok: '+(c.tip==='sicak'?'yaz çok kısa ya da ilk don ürün döngüsünü kesiyor.':'sıcaklık bandı tutmuyor.')+'</span></div>';
+  wins.forEach(w=>{const l=len(w);
+    const lab=c.tip==='serin'?(norm(w.s)<200&&(w.e<=365||l<300)?'İlkbahar':'Sonbahar')+' penceresi':(wins.length>1?(norm(w.s)<200?'Ana ekim':'İkinci ekim'):'Açıkta ekim');
+    h+='<div class="win"><span class="k">'+(l>=360?'Yıl boyu':lab)+'</span><span class="v">'+(l>=360?'Her ay ekilebilir':fmt(w.s)+' → '+fmt(w.e))+(l<14?' <span class="note">(kısa ve riskli)</span>':'')+'</span>'
+     +(l>=20&&l<360?'<span class="k">Önerilen</span><span class="v">'+fmt(recOf(w))+' civarı</span>':'')+'</div>'});
+  if(c.fide&&ps&&planWins.length){h+='<div class="win"><span class="k">Fide</span><span class="v">Tohumu '+fmt(ps.abs-c.fide*7)+' tarihinde kasaya ekin ('+c.fide+' hafta fide yetiştirme)</span></div>'}
+  if(c.tip==='sicak'&&tw.length){const w=tw[0];h+='<div class="win tun"><span class="k">Alçak tünel</span><span class="v">'+fmt(w.s)+' → '+fmt(w.e)+' <span class="note">(örtü yaklaşık +3 °C kazandırır; açık alandan daha erken başlar)</span></span></div>'}
+  h+='</div>';
+
+  // gerekçe
+  const L=[];
+  if(c.tip==='sicak'){
+    if(wins.length){const w=wins[0];L.push(p.ad+'\'de gün ortalaması sıcaklık '+fmt(w.s)+' civarında '+c.t0+' °C eşiğini geçiyor; '+c.ad.toLowerCase()+' için toprak sıcaklığı da en az '+c.soil+' °C olmalı.')}
+    else L.push('Açık alanda gün ortalaması '+c.t0+' °C eşiği yeterince uzun kalmıyor ya da ilk don '+cy+' günlük ürün döngüsünü bitirmeden geliyor.');
+    L.push(fr.last?'Tahmini son bahar donu '+fmt(fr.last)+'. Dikim bundan en az 7 gün sonraya bırakıldı.':'Bu ilde don riski çok düşük; pencereyi yalnızca sıcaklık belirliyor.');
+    if(fr.first)L.push('Tahmini ilk sonbahar donu '+fmt(fr.first)+'. '+cy+' günlük döngünün tamamlanması için açıkta son dikim bu tarihin '+cy+' gün öncesiyle sınırlı.');
+    if(hottest>28)L.push('En sıcak ay ortalaması '+r1(hottest)+' °C: Temmuz-Ağustos\'ta çiçek tutumu ısı stresiyle düşebilir; gölgeleme ve sabah sulaması planlayın.');
+  }else{
+    L.push(c.ad+' serin mevsim kültürüdür: gün ortalaması '+c.t0+'-'+c.t1+' °C arasındayken çimlenir ve iyi gelişir.');
+    if(wins.length>1)L.push('İlin sıcaklık eğrisi bu bandı yılda iki kez geçiyor; bu yüzden ilkbahar ve sonbahar olmak üzere iki ayrı pencere var.');
+    if(c.t1<26)L.push(c.t1+' °C üzerinde çimlenme düşer ve çiçek sapına kalkma (verim kaybı) artar; bu yüzden yaz ortası pencerenin dışında bırakıldı.');
+    L.push('Pencerenin sonunda sıcaklığın '+(c.t0-3)+' °C altına düşmemesi koşulu da arandı; böylece fide ilk 25 gün içinde donmadan gelişir.');
+  }
+  if(p.rakim>1000)L.push('Rakım ~'+p.rakim+' m: geceler soğuk geçer. Gece sıcaklığı eşiğe yakınsa dikimi birkaç gün geciktirin veya örtü kullanın.');
+  if(p.yagis<450)L.push('Yıllık yağış ~'+p.yagis+' mm: yaz yağışına güvenilmez; damla sulama ve malç planlayın.');
+  else if(p.yagis>1000)L.push('Yağışlı iklim (~'+p.yagis+' mm): mantar hastalığı baskısı yüksek. Geniş sıra arası, iyi drenaj ve yaprağı ıslatmayan sulama seçin.');
+  h+='<ul class="why">'+L.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+  h+='<div class="chartBox">'+chart(p,c,fr,wins,tw,TODAY)+'<div class="legend"><span><i style="background:var(--accent);opacity:.5"></i>açıkta ekim penceresi</span><span><i style="background:var(--sun)"></i>alçak tünel kazancı</span><span><i style="background:var(--frost);opacity:.4"></i>don riski</span><span><i style="background:var(--warn)"></i>bugün</span></div></div></section>';
+
+  // 3) gelişme aşamaları
+  h+='<section><h2>Gelişme aşamaları</h2>';
+  h+='<p class="note">'+(ps?(tunnelPlan?'Açık alanda pencere yok; takvim alçak tünel varsayımıyla ':'Takvim ')+(ps.now?'bugün ('+fmt(ps.abs)+') başlayacak şekilde':'önerilen başlangıç '+fmt(ps.abs)+' olacak şekilde')+' hesaplandı.':'Uygun pencere olmadığı için süreler başlangıçtan itibaren gün olarak verilir.')+' Ekim: '+c.aralik+' (sıra arası × üzeri), derinlik: '+c.derin+', toprak pH '+c.ph+'. Fotoğraflara tıklayınca büyür.</p>';
+  h+=seedBox(c);
+  const cols=['var(--leaf)','var(--accent)','var(--sun)','var(--warn)','var(--stem)'];
+  h+='<div class="bar" aria-hidden="true">'+c.st.map((d,i)=>'<span style="flex:'+d+';background:'+cols[i]+'"></span>').join('')+'</div>';
+  h+='<div class="stages">';
+  let acc=0;const dist=DIST[c.grup],mid=i=>(c.npk[i]+c.npk[i+1])/2;
+  c.st.forEach((d,i)=>{
+    const b=acc,e=acc+d-1;acc+=d;
+    const tm=T(p,(ps?ps.abs:TODAY)+b+d/2),mm=7*ET0(p,tm)*c.kc[i];
+    const nn=mid(0)*dist.N[i]/100,pp=mid(2)*dist.P[i]/100,kk=mid(4)*dist.K[i]/100;
+    h+='<div class="stage"><div class="top">'+stageVis(c,i)+'<div><h3>'+STG[c.grup][i]+'</h3><div class="dates">'+(ps?fmt(ps.abs+b)+' → '+fmt(ps.abs+e)+' · ':'')+'gün '+(b+1)+'-'+(e+1)+'</div>'+stageCap(c,i)+'</div></div>'
+     +'<p><b>Sulama:</b> '+TASK[c.grup][i][0]+' Yağışsız bir haftada yaklaşık <b>'+Math.round(mm)+' mm</b> ('+Math.round(mm)+' L/m²) gerekir; dönem sıcaklığı ~'+Math.round(tm)+' °C.</p>'
+     +'<p><b>Gübre:</b> '+(nn+pp+kk>0?'N '+r1(nn)+' · P₂O₅ '+r1(pp)+' · K₂O '+r1(kk)+' kg/da.':'Bu dönemde gübre vermeyin.')+'</p>'
+     +'<p><b>Bakım:</b> '+TASK[c.grup][i][1]+'</p>'
+     +'<div class="links"><a href="'+inatStage(c,i)[0]+'" target="_blank" rel="noopener">Gerçek fotoğraflar: '+inatStage(c,i)[1]+'</a>'+(i>0&&!stageShot(c,i)&&!upShot(c,i)?srcLinks(c,i):'')+'</div>'+upUI(c,i)+'</div>'});
+  h+='</div><p class="note" style="margin-top:12px"><b>İpucu:</b> '+c.ipucu+'</p></section>';
+
+  // 4) gübre özeti
+  h+='<section><h2>Gübre programı özeti</h2><div class="panel scroll"><table><thead><tr><th>Aşama</th><th>N</th><th>P₂O₅</th><th>K₂O</th></tr></thead><tbody>';
+  c.st.forEach((d,i)=>{h+='<tr><td>'+STG[c.grup][i]+'</td><td>'+r1(mid(0)*dist.N[i]/100)+'</td><td>'+r1(mid(2)*dist.P[i]/100)+'</td><td>'+r1(mid(4)*dist.K[i]/100)+'</td></tr>'});
+  h+='<tr><th>Toplam (kg/da)</th><th>'+c.npk[0]+'-'+c.npk[1]+'</th><th>'+c.npk[2]+'-'+c.npk[3]+'</th><th>'+c.npk[4]+'-'+c.npk[5]+'</th></tr></tbody></table></div>'
+   +'<p class="note" style="margin-top:8px">Fosfor ve ekim öncesi dipgübre ilk aşamada verilir; azot ve potasyum damla sulamayla bölünerek verilebilir. Tablo orta değeri gösterir. Toprak analizi sonucuna göre artırın ya da azaltın.</p></section>';
+
+  // 5) hastalık ve zararlılar
+  h+='<section><h2>Hastalık ve zararlılar</h2><div class="panel"><p class="note">Doğrulanmış fotoğraflar için bağlantılar iNaturalist\'in araştırma sınıfı (topluluk tarafından teyit edilmiş) gözlemlerini açar.</p>';
+  h+='<div class="disease"><h3>'+c.ad+' <span class="lat">'+c.lat+'</span></h3><div class="links"><a href="'+inat(c.lat)+'" target="_blank" rel="noopener">Sağlıklı bitki fotoğrafları</a></div></div>';
+  c.h.forEach(x=>{h+='<div class="disease"><h3>'+x[0]+' <span class="lat">'+x[1]+'</span></h3><p>'+x[2]+'</p><p class="note"><b>Önlem:</b> '+x[3]+'</p>'+dgal(x)+(isTx(x[1])?'<div class="links"><a href="'+inat(x[1])+'" target="_blank" rel="noopener">iNaturalist fotoğrafları</a></div>':'')+'</div>'});
+  h+='</div></section>';
+
+  // 6) tüm kültürler
+  h+='<section><h2>'+p.ad+' için tüm kültürler</h2><div class="ledger">';
+  CROPS.forEach((k,i)=>{const ka=okArr(p,k),kw=ranges(ka),ks=statusOf(ka,TODAY);
+    const first=kw.length?kw.map(w=>len(w)>=360?'yıl boyu':fmt(w.s)+'-'+fmt(w.e)).join(' · '):(k.tip==='sicak'?'açıkta zor, örtüaltı':'—');
+    h+='<button class="row" data-i="'+i+'"'+(i===state.crop?' aria-current="true"':'')+'><span class="nm">'+k.ad+'</span><span class="pill '+ks.k+'">'+ks.t+'</span><span class="sub">'+first+'</span></button>'});
+  h+='</div></section>';
+  $('out').innerHTML=h;zoomify();
+}
+
+function chips(){const G=[['meyve','Meyveli sebze ve meyveler'],['yaprak','Yeşillikler ve otlar'],['baklagil','Baklagiller']];
+  $('chips').innerHTML=G.map(g=>'<div class="grp"><span class="eyebrow">'+g[1]+'</span><div class="grow">'+CROPS.map((c,i)=>c.grup===g[0]?'<button class="chip" data-i="'+i+'" aria-pressed="'+(i===state.crop)+'"><span class="th" aria-hidden="true">'+thumb(c)+'</span>'+c.ad+'</button>':'').join('')+'</div></div>').join('')}
+function pickCrop(i,scroll){state.crop=i;save();chips();render();if(scroll)window.scrollTo({top:$('chips').offsetTop-8,behavior:'smooth'})}
+$('il').innerHTML=PROV.map((p,i)=>'<option value="'+i+'">'+p.ad+'</option>').join('');
+$('il').value=state.il;
+$('il').addEventListener('change',e=>{state.il=+e.target.value;save();render()});
+$('airT').addEventListener('input',render);$('soilT').addEventListener('input',render);
+$('chips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)pickCrop(+b.dataset.i,false)});
+$('out').addEventListener('click',e=>{const z=e.target.closest('img[data-z]');if(z){lbOpen(z);return}const u=e.target.closest('[data-up]');if(u){upAct(u);return}const b=e.target.closest('.row');if(b)pickCrop(+b.dataset.i,true)});
+$('out').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('img[data-z]')){e.preventDefault();lbOpen(e.target)}});
+const blobErr=e=>{const im=e.target,m=im&&im.tagName==='IMG'&&/^\/_blob\/([0-9a-f]{32})$/.exec(im.getAttribute('src')||'');if(m&&!BAD[m[1]]){BAD[m[1]]=1;chips();render()}};
+$('out').addEventListener('error',blobErr,true);
+$('chips').addEventListener('error',blobErr,true);
+$('lbX').addEventListener('click',lbClose);
+$('lbPrev').addEventListener('click',()=>lbStep(-1));
+$('lbNext').addEventListener('click',()=>lbStep(1));
+$('lb').addEventListener('click',e=>{const x=e.target;if(x.id==='lb'||x.classList.contains('lb-in')||x.classList.contains('lb-f'))lbClose()});
+document.addEventListener('keydown',e=>{if(!LB.open)return;
+  if(e.key==='Escape'){e.preventDefault();lbClose()}
+  else if(e.key==='ArrowLeft'){e.preventDefault();lbStep(-1)}
+  else if(e.key==='ArrowRight'){e.preventDefault();lbStep(1)}
+  else if(e.key==='Tab'){const f=[].slice.call($('lb').querySelectorAll('button,a[href]')).filter(x=>!x.hidden);
+    if(!f.length)return;const i=f.indexOf(document.activeElement);
+    if(e.shiftKey&&i<=0){e.preventDefault();f[f.length-1].focus()}
+    else if(!e.shiftKey&&(i<0||i===f.length-1)){e.preventDefault();f[0].focus()}}});
+let TX=null;
+$('lb').addEventListener('touchstart',e=>{TX=e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null},{passive:true});
+$('lb').addEventListener('touchend',e=>{if(!TX)return;const q=e.changedTouches[0],dx=q.clientX-TX.x,dy=q.clientY-TX.y;TX=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)lbStep(dx<0?1:-1)},{passive:true});
+addEventListener('resize',()=>{if(LB.open)lbFit()});
+$('out').addEventListener('input',e=>{if(e.target.id==='upNote'&&PEND)PEND.note=e.target.value});
+$('finder').addEventListener('click',e=>{const b=e.target.closest('.lk');if(b){pickCrop(+b.dataset.i,false);const s=$('seedbox');if(s)s.scrollIntoView({behavior:'smooth',block:'start'})}});
+$('upFile').addEventListener('change',onPick);
+chips();$('finder').innerHTML=seedTable();render();upInit();
+</script>
+
+</body></html>
